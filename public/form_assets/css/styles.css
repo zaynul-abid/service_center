@@ -1,0 +1,305 @@
+body {
+  background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.container {
+  background-color: #ffffff;
+  padding: 2rem;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  max-width: 800px;
+  width: 100%;
+}
+
+.header-image {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.header-image img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+}
+
+h2 {
+  color: #191b1d;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  font-weight: 700;
+  font-size: 2rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  background: linear-gradient(135deg, #5e5e5f, #161616);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+h6 {
+  color: #0d6efd;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 1rem;
+  display: inline-block;
+}
+
+.form-label {
+  font-weight: 500;
+  color: #333;
+}
+
+.form-label.required::after {
+  content: " *";
+  color: red;
+}
+
+.form-control {
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  padding: 10px;
+  font-size: 14px;
+}
+
+.form-control:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 5px rgba(13, 110, 253, 0.5);
+}
+
+.btn-primary {
+  background-color: #0d6efd;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1rem;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: #0b5ed7;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1rem;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268;
+}
+
+.file-upload {
+  border: 2px dashed #0d6efd;
+  padding: 1rem;
+  text-align: center;
+  border-radius: 10px;
+  background-color: #f1f8ff;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.file-upload:hover {
+  background-color: #e2f0ff;
+}
+
+.file-upload input[type="file"] {
+  display: none;
+}
+
+.file-upload label {
+  margin: 0;
+  color: #0d6efd;
+  cursor: pointer;
+}
+
+.current-time {
+  text-align: right;
+  font-size: 1.1rem;
+  color: #555;
+  margin-bottom: 1.5rem;
+}
+
+.alert {
+  border-radius: 8px;
+  padding: 0.75rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.alert-success {
+  background: #e6ffe6;
+  color: #2e7d32;
+}
+
+.alert-danger {
+  background: #ffe6e6;
+  color: #c62828;
+}
+
+
+#vehicleSuggestions {
+  border: 1px solid #ccc;
+  background-color: #f8f9fa;
+  /* Light background for suggestions */
+  max-height: 150px;
+  /* Limit max height and make it scrollable if needed */
+  overflow-y: auto;
+  margin-top: 5px;
+  border-radius: 4px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Styling individual list items */
+#vehicleSuggestions li {
+  padding: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  border-bottom: 1px solid #ddd;
+  /* Light divider between items */
+}
+
+/* On hover */
+#vehicleSuggestions li:hover {
+  background-color: #007BFF;
+  /* Bootstrap primary blue */
+  color: white;
+  /* White text for contrast */
+}
+
+/* Highlighted item using keyboard (arrow keys) */
+#vehicleSuggestions li.highlight {
+  background-color: #28a745;
+  /* Green background for selected item */
+  color: white;
+  /* White text for visibility */
+}
+
+#customerSuggestions {
+  border: 1px solid #ccc;
+  background-color: #f8f9fa;
+  /* Light background for suggestions */
+  max-height: 150px;
+  /* Limit max height to avoid overflow */
+  overflow-y: auto;
+  /* Scroll if too many suggestions */
+  margin-top: 5px;
+  border-radius: 4px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  /* Subtle shadow for depth */
+}
+
+/* Styling individual list items */
+#customerSuggestions li {
+  padding: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  border-bottom: 1px solid #ddd;
+  /* Light divider between items */
+}
+
+/* On hover */
+#customerSuggestions li:hover {
+  background-color: #007BFF;
+  /* Bootstrap primary blue */
+  color: white;
+  /* White text for contrast */
+}
+
+/* Highlighted item using keyboard (arrow keys) */
+#customerSuggestions li.highlight {
+  background-color: #28a745;
+  /* Green background for selected item */
+  color: white;
+  /* White text for visibility */
+}
+
+
+
+
+
+#companySuggestions {
+  border: 1px solid #ccc;
+  background-color: #f8f9fa;
+  /* Light background for suggestions */
+  max-height: 150px;
+  /* Limit max height and make it scrollable if needed */
+  overflow-y: auto;
+  margin-top: 5px;
+  border-radius: 4px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Styling individual list items */
+#companySuggestions li {
+  padding: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  border-bottom: 1px solid #ddd;
+  /* Light divider between items */
+}
+
+/* On hover */
+#companySuggestions li:hover {
+  background-color: #007BFF;
+  /* Bootstrap primary blue */
+  color: white;
+  /* White text for contrast */
+}
+
+/* Highlighted item using keyboard (arrow keys) */
+#companySuggestions li.highlight {
+  background-color: #28a745;
+  /* Green background for selected item */
+  color: white;
+  /* White text for visibility */
+}
+
+
+
+
+
+#modelSuggestions {
+  border: 1px solid #ccc;
+  background-color: #f8f9fa;
+  /* Light background for suggestions */
+  max-height: 150px;
+  /* Limit max height and make it scrollable if needed */
+  overflow-y: auto;
+  margin-top: 5px;
+  border-radius: 4px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Styling individual list items */
+#modelSuggestions li {
+  padding: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  border-bottom: 1px solid #ddd;
+  /* Light divider between items */
+}
+
+/* On hover */
+#modelSuggestions li:hover {
+  background-color: #007BFF;
+  /* Bootstrap primary blue */
+  color: white;
+  /* White text for contrast */
+}
+
+/* Highlighted item using keyboard (arrow keys) */
+#modelSuggestions li.highlight {
+  background-color: #28a745;
+  /* Green background for selected item */
+  color: white;
+  /* White text for visibility */
+}
