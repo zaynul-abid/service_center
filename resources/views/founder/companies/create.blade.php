@@ -13,17 +13,12 @@
             <h4>Create Company</h4>
         </div>
         <div class="card-body">
-{{--
-            @if ($errors->any())
-                <div class="alert alert-danger">
-                    <ul>
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
+
+            @if ($errors->has('error'))  <!-- For your transaction errors -->
+            <div class="alert alert-danger">
+                {{ $errors->first('error') }}
+            </div>
             @endif
---}}
 
             <form action="{{ route('companies.store') }}" method="POST" id="companyForm">
                 @csrf

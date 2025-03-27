@@ -15,16 +15,16 @@
                     Company Creation
                 </a>
 
-                <a class="nav-link {{ request()->routeIs('services.index') ? 'active' : '' }}" href="{{ route('services.index') }}">
-                    <div class="sb-nav-link-icon"><i class="fas fa-clock"></i></div>
-                    Services
-                </a>
-
-
 
                 <a class="nav-link {{ request()->routeIs('superadmins.index') ? 'active' : '' }}" href="{{ route('superadmins.index') }}">
                     <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
                     SuperAdmin Details
+                </a>
+
+
+                <a class="nav-link {{ request()->routeIs('services.index') ? 'active' : '' }}" href="{{ route('services.index') }}">
+                    <div class="sb-nav-link-icon"><i class="fas fa-clock"></i></div>
+                    Services
                 </a>
 
 

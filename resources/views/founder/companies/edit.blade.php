@@ -13,6 +13,12 @@
             <h4>Edit Company</h4>
         </div>
 
+        @if ($errors->has('error'))  <!-- For your transaction errors -->
+        <div class="alert alert-danger">
+            {{ $errors->first('error') }}
+        </div>
+        @endif
+
         <div class="card-body">
             <form action="{{ route('companies.update', $company->id) }}" method="POST">
                 @csrf
