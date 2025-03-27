@@ -39,11 +39,45 @@
         <script src="{{asset('admin_assets/assets/demo/chart-bar-demo.js')}}"></script>
         <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
         <script src="{{asset('admin_assets/js/datatables-simple-demo.js')}}"></script>
-
+        <script src="{{asset('founder_assets/js/script.js')}}"></script>
         <script>
             function showImage(imageUrl) {
                 document.getElementById('largeImage').src = imageUrl;
             }
         </script>
+
+{{--        <script>--}}
+{{--            document.addEventListener('DOMContentLoaded', function() {--}}
+{{--                const form = document.getElementById('companyForm');--}}
+{{--                const inputs = form.querySelectorAll('input, textarea');--}}
+
+{{--                // Handle Enter key press--}}
+{{--                form.addEventListener('keydown', function(e) {--}}
+{{--                    if (e.key === 'Enter') {--}}
+{{--                        e.preventDefault();--}}
+
+{{--                        const activeElement = document.activeElement;--}}
+
+{{--                        if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {--}}
+{{--                            // Check if this is the last field that should submit on Enter--}}
+{{--                            if (activeElement.hasAttribute('data-submit-on-enter')) {--}}
+{{--                                form.submit();--}}
+{{--                            }--}}
+{{--                            // Otherwise move to next field--}}
+{{--                            else {--}}
+{{--                                const nextFieldName = activeElement.getAttribute('data-next');--}}
+{{--                                if (nextFieldName) {--}}
+{{--                                    const nextField = form.querySelector(`[name="${nextFieldName}"]`);--}}
+{{--                                    if (nextField) {--}}
+{{--                                        nextField.focus();--}}
+{{--                                    }--}}
+{{--                                }--}}
+{{--                            }--}}
+{{--                        }--}}
+{{--                    }--}}
+{{--                });--}}
+{{--            });--}}
+{{--        </script>--}}
+
     </body>
 </html>
