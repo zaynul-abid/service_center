@@ -21,7 +21,7 @@
     <div class="container-fluid">
         <h4 class="mb-4">Recycle Bin</h4>
 
-        {{-- Success Message --}}
+
         @if(session('success'))
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 {{ session('success') }}
@@ -29,7 +29,6 @@
             </div>
         @endif
 
-        {{-- Error Message --}}
         @if(session('error'))
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 {{ session('error') }}
