@@ -74,6 +74,10 @@
                 @error('vehicle_number'))
                     <div class="text-danger mt-1" style="font-size: 0.9rem;">{{ $message }}</div>
                 @enderror
+
+                <ul id="vehicleSuggestions" style="display:none; list-style:none; padding-left:0; border:1px solid #ccc;">
+                    <!-- Suggestions will be shown here dynamically -->
+                </ul>
             </div>
             <div class="col-md-6">
                 <label for="vehicle_type" class="form-label required">Vehicle Type</label>
@@ -98,14 +102,22 @@
                 @error('vehicle_company'))
                     <div class="text-danger mt-1" style="font-size: 0.9rem;">{{ $message }}</div>
                 @enderror
+
+                <ul id="companySuggestions" style="display:none; list-style:none; padding-left:0;  border:1px solid #ccc;">
+                    <!-- Dynamically added suggestions will have the same width as the input -->
+                </ul>
             </div>
-            
+
             <div class="col-md-6" style="position: relative;">
                 <label for="vehicleModel" class="form-label required">Vehicle Model</label>
                 <input type="text" class="form-control @error('vehicle_model') is-invalid @enderror" id="vehicleModel" name="vehicle_model" placeholder="Enter Vehicle Model" value="{{ old('vehicle_model', $service->vehicle_model) }}" required>
                 @error('vehicle_model'))
                     <div class="text-danger mt-1" style="font-size: 0.9rem;">{{ $message }}</div>
                 @enderror
+
+                <ul id="modelSuggestions" style="display:none; list-style:none; padding-left:0; border:1px solid #ccc;">
+                    <!-- Model suggestions will be dynamically inserted here -->
+                </ul>
             </div>
         </div>
 
@@ -153,7 +165,7 @@
                     <div class="text-danger mt-1" style="font-size: 0.9rem;">{{ $message }}</div>
                 @enderror
             </div>
-        
+
             <div class="col-md-6">
                 <label for="contactNumber1" class="form-label required">Contact Number 1</label>
                 <input type="tel" class="form-control @error('contact_number_1') is-invalid @enderror" id="contactNumber1" name="contact_number_1" placeholder="Enter Contact Number 1" value="{{ old('contact_number_1', $service->contact_number_1) }}" required>
@@ -162,7 +174,7 @@
                 @enderror
             </div>
         </div>
-        
+
         <div class="row mb-3">
             <div class="col-md-6">
                 <label for="contactNumber2" class="form-label">Contact Number 2</label>
@@ -171,7 +183,7 @@
                     <div class="text-danger mt-1" style="font-size: 0.9rem;">{{ $message }}</div>
                 @enderror
             </div>
-        
+
             <div class="col-md-6">
                 <label for="place" class="form-label">Place</label>
                 <input type="text" class="form-control @error('place') is-invalid @enderror" id="place" name="place" placeholder="Enter Place" value="{{ old('place', $service->place) }}">
@@ -180,7 +192,7 @@
                 @enderror
             </div>
         </div>
-        
+
 
         <h6 class="mt-4">SERVICE DETAILS</h6>
         <hr>

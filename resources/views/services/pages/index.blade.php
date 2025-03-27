@@ -1,7 +1,6 @@
 @extends('backend.layouts.app')
 
-@section('title','service-form')
-
+@section('title', 'Service Management')
 
 @if(auth()->user()->usertype === 'founder')
     @section('navbar')
@@ -17,119 +16,152 @@
     @endsection
 @endif
 
-
 @section('content')
+    <div class="container-fluid p-2">
+        <div class="card border-0 bg-white rounded-lg shadow-xs">
+            <div class="card-header bg-transparent border-0 p-2 pb-0">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0 text-gray-900 fw-semibold">Service Bookings</h4>
+                    <a href="{{ route('services.create') }}" class="btn btn-primary px-4 py-2 rounded-md">
+                        <i class="bi bi-plus-lg me-2"></i>New Booking
+                    </a>
+                </div>
 
-
-
-
-<div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <h4>Company List</h4>
-        <a href="{{ route('services.create') }}" class="btn btn-primary">Service Creation</a>
-    </div>
-
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
-
-    <div class="card-body">
-        <table id="datatablesSimple" class="table">
-            <thead>
-                <tr>
-                    <th>Booking ID</th>
-                    <th>Booking Date</th>
-                    <th>Customer Name</th>
-                    <th>Vehicle Number</th>
-                    <th>Vehicle Model</th>
-                    <th>Contact Number</th>
-
-                    <th>Delivery date </th>
-                    <th>Employee Status  </th>
-                    <th>Status  </th>
-                    <th> Cost</th>
-                    <th> Photo</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($services as $service)
-                <tr>
-                    <td>{{ $service->booking_id }}</td>
-                    <td>{{ $service->booking_date }}</td>
-                    <td>{{ $service->customer_name }}</td>
-                    <td>{{ $service->vehicle_number }}</td>
-                    <td>{{ $service->vehicle_model  }}</td>
-                    <td>{{ $service->contact_number_1 }}</td>
-                    <td>{{ $service->expected_delivery_date	 }}</td>
-                    <td>{{ $service->service_status	 }}</td>
-                    <td>{{ $service->status	 }}</td>
-                    <td>{{ $service->cost }}</td>
-
-
-
-
-
-
-
-
-
-
-                    <td>
-                        @if (!empty($service->photos) && is_string($service->photos))
-                            @foreach (json_decode($service->photos, true) as $index => $photo)
-                            <img src="{{ asset('storage/' . $photo) }}"
-                            width="80" height="50"
-                            class="img-thumbnail"
-                            style="cursor: pointer;"
-                            data-bs-toggle="modal"
-                            data-bs-target="#imageModal"
-                            onclick="showImage('{{ asset('storage/' . $photo) }}')">
-
-                            @endforeach
-                        @else
-                            No Photos
-                        @endif
-                    </td>
-                    <td>
-                        <div class="d-flex align-items-center gap-2">
-                            <a href="{{ route('services.edit', $service->id) }}" class="btn btn-primary btn-sm">Edit</a>
-
-                            <form action="{{ route('services.destroy', $service->id) }}" method="POST">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</button>
-                            </form>
-                        </div>
-                    </td>
-
-
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-
-    </div>
-</div>
-
-<div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="imageModalLabel">Image Preview</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                @if(session('success'))
+                    <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        {{ session('success') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                @endif
             </div>
-            <div class="modal-body text-center">
-                <img id="largeImage" src="" alt="Large Preview" class="img-fluid">
+
+            <div class="card-body p-4">
+                <div class="table-responsive border rounded-3 bg-white">
+                    <table class="table table-hover align-middle mb-0" id="serviceTable">
+                        <thead>
+                        <tr class="text-gray-700">
+                            <th class="ps-3 border-end">Booking ID</th>
+                            <th class="border-end">Date</th>
+                            <th class="border-end">Customer</th>
+                            <th class="border-end">Vehicle</th>
+                            <th class="border-end">Contact</th>
+                            <th class="border-end">Delivery</th>
+                            <th class="border-end">Status</th>
+                            <th class="border-end">Employee Status</th>
+                            <th class="border-end">Cost</th>
+                            <th class="border-end">Photos</th>
+                            <th class="pe-3 text-end">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @foreach ($services as $service)
+                            <tr>
+                                <td class="ps-3 fw-medium text-primary border-end">{{ $service->booking_id }}</td>
+                                <td class="border-end">
+                                    <div class="text-sm text-gray-600">
+                                        {{ \Carbon\Carbon::parse($service->booking_date)->format('d M Y') }}
+                                    </div>
+                                </td>
+                                <td class="fw-medium border-end">{{ $service->customer_name }}</td>
+                                <td class="border-end">
+                                    <div class="d-flex flex-column">
+                                        <span class="fw-medium">{{ $service->vehicle_number }}</span>
+                                        <small class="text-gray-500">{{ $service->vehicle_model }}</small>
+                                    </div>
+                                </td>
+                                <td class="border-end">{{ $service->contact_number_1 }}</td>
+                                <td class="border-end">
+                                    <div class="text-sm text-gray-600">
+                                        {{ \Carbon\Carbon::parse($service->expected_delivery_date)->format('d M Y') }}
+                                    </div>
+                                </td>
+                                <td class="border-end">
+                                <span class="badge rounded-pill py-1 px-3
+                                    @if($service->status === 'completed') bg-success-light text-success
+                                    @elseif($service->status === 'in_progress') bg-warning-light text-warning
+                                    @elseif($service->status === 'pending') bg-info-light text-info
+                                    @else bg-secondary-light text-secondary @endif">
+                                    {{ ucfirst(str_replace('_', ' ', $service->status)) }}
+                                </span>
+                                </td>
+                                <td class="border-end">
+                                <span class="badge rounded-pill py-1 px-3
+                                    @if($service->service_status === 'Requested') bg-dark text-light
+                                    @elseif($service->service_status === 'completed') bg-success-light text-success
+                                    @elseif($service->service_status === 'in_progress') bg-warning-light text-warning
+                                    @elseif($service->service_status === 'accepted') bg-info-light text-info
+                                    @elseif($service->service_status === 'rejected') bg-indigo-700-light text-info
+                                    @else bg-secondary-light text-secondary @endif">
+                                    {{ ucfirst(str_replace('_', ' ', $service->service_status)) }}
+                                </span>
+                                </td>
+                                <td class="fw-medium text-gray-900 border-end">₹{{ number_format($service->cost, 2) }}</td>
+                                <td class="border-end">
+                                    @if (!empty($service->photos) && is_string($service->photos))
+                                        <div class="d-flex gap-2">
+                                            @foreach (json_decode($service->photos, true) as $photo)
+                                                <div class="avatar-xs">
+                                                    <img src="{{ asset('storage/' . $photo) }}"
+                                                         class="rounded-2 object-fit-cover cursor-pointer w-100 h-100"
+                                                         data-bs-toggle="modal"
+                                                         data-bs-target="#imageModal"
+                                                         onclick="showImage('{{ asset('storage/' . $photo) }}')"
+                                                         style="cursor: pointer;">
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @else
+                                        <span class="text-gray-400 small">-</span>
+                                    @endif
+                                </td>
+                                <td class="pe-3 text-end">
+                                    <div class="d-flex justify-content-end gap-2">
+                                        <a href="{{ route('services.edit', $service->id) }}"
+                                           class="btn btn-sm btn-icon btn-outline-primary rounded-circle"
+                                           title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <form action="{{ route('services.destroy', $service->id) }}" method="POST">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit"
+                                                    class="btn btn-sm btn-icon btn-outline-danger rounded-circle"
+                                                    title="Delete"
+                                                    onclick="return confirm('Are you sure?')">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
-</div>
+
+    <!-- Image Modal -->
+    <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow rounded-4">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold text-primary">Photo Preview</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-3 text-center">
+                    <img id="largeImage" src="" alt="Image Preview" class="img-fluid rounded-3 shadow-sm">
+                </div>
+            </div>
+        </div>
+    </div>
 
 
-
-
+    <script>
+        function showImage(src) {
+            document.getElementById('largeImage').src = src;
+        }
+    </script>
 @endsection

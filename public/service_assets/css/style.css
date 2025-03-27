@@ -1,0 +1,75 @@
+
+    /* Table Border Styles */
+.table-responsive {
+    border: 1px solid #dee2e6;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+#serviceTable {
+    border-collapse: collapse;
+    margin-bottom: 0;
+}
+
+#serviceTable th,
+#serviceTable td {
+    border: 1px solid #dee2e6;
+    padding: 12px 16px;
+    vertical-align: middle;
+}
+
+#serviceTable th {
+    background-color: #f8f9fa;
+    border-bottom-width: 2px;
+}
+
+#serviceTable tr:first-child th {
+    border-top: none;
+}
+
+#serviceTable tr:last-child td {
+    border-bottom: none;
+}
+
+/* Existing Styles */
+.card {
+    border-radius: 12px;
+    overflow: hidden;
+}
+.bg-success-light {
+    background-color: rgba(25, 135, 84, 0.1);
+}
+.bg-warning-light {
+    background-color: rgba(255, 193, 7, 0.1);
+}
+.bg-info-light {
+    background-color: rgba(13, 202, 240, 0.1);
+}
+.bg-secondary-light {
+    background-color: rgba(108, 117, 125, 0.1);
+}
+.btn-icon {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.avatar-xs {
+    width: 40px;
+    height: 40px;
+}
+#serviceTable th {
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #6c757d;
+}
+.rounded-md {
+    border-radius: 8px;
+}
+.p-4 {
+    padding: 1rem !important;
+}
+

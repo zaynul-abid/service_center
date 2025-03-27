@@ -19,46 +19,34 @@
 
 @section('content')
 
-{{-- Success Message --}}
-@if (session('success'))
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <strong>Success!</strong> {{ session('success') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-@endif
 
-{{-- Error Message --}}
-@if (session('error'))
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <strong>Error!</strong> {{ session('error') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-@endif
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h4>Company List</h4>
+            <a href="{{ route('superadmin-admins.create') }}" class="btn btn-primary">Create Admin</a>
+        </div>
 
-{{-- Validation Errors --}}
-@if ($errors->any())
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <strong>There were some errors with your input:</strong>
-        <ul>
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-@endif
-
-<div class="col-lg-12">
-    <div class="card w-100">
-        <div class="card-body">
-            <div class="d-sm-flex d-block align-items-center justify-content-between mb-4">
-                <h5 class="card-title fw-semibold">Admin Users List</h5>
-                <a href="{{ route('superadmin-admins.create') }}" class="btn btn-primary">Add New</a>
+        <!-- Flash Messages -->
+        @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show mx-3 mt-3" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-            <div class="table-responsive">
-                <table class="table table-bordered align-middle">
-                    <thead class="table-light">
-                        <tr>
+        @endif
+
+        @if(session('error'))
+            <div class="alert alert-danger alert-dismissible fade show mx-3 mt-3" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
+        <div class="card-body">
+            <table id="datatablesSimple" class="table">
+                <thead class="table-light">
+                <tr>
                             <th>#</th>
                             <th>Name</th>
                             <th>Email</th>

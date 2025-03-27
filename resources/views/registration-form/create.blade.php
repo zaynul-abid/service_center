@@ -3,6 +3,22 @@
 
 @section('content')
 <div class="container">
+{{--    <div class="mt-4">--}}
+{{--        <button--}}
+{{--            type="button"--}}
+{{--            class="btn btn-outline-dark rounded-pill px-4 py-2 fw-medium"--}}
+{{--            onclick="history.back()"--}}
+{{--            style="--}}
+{{--            transition: all 0.3s ease;--}}
+{{--            border-width: 2px;--}}
+{{--        "--}}
+{{--            onmouseover="this.style.backgroundColor='#111111'; this.style.color='white'"--}}
+{{--            onmouseout="this.style.backgroundColor='transparent'; this.style.color='#1a1a1a'"--}}
+{{--        >--}}
+{{--            <i class="bi bi-arrow-left me-2"></i>Back--}}
+{{--        </button>--}}
+{{--    </div>--}}
+
     <h2>Create Vehicle Service</h2>
 
     <!-- Display Current Date and Time -->
@@ -272,6 +288,7 @@
         <div class="text-center">
             <button type="submit" class="btn btn-primary">Submit</button>
             <button type="button" class="btn btn-secondary" onclick="resetForm()">Refresh</button>
+
         </div>
     </form>
 </div>

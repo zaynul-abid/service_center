@@ -38,7 +38,7 @@
     <div class="card">
         <div class="card-body">
             <h5 class="card-title fw-semibold">Add New Admin</h5>
-            <form action="{{ route('superadmin-admins.store') }}" method="POST">
+            <form action="{{ route('superadmin-admins.store') }}" method="POST" id="adminForm">
                 @csrf
 
                 {{-- Name --}}
@@ -96,5 +96,44 @@
         </div>
     </div>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('adminForm');
+
+        if (form) {
+            form.addEventListener('keydown', function(e) {
+                // Get all focusable elements in the form
+                const focusableElements = Array.from(form.querySelectorAll('input, select, textarea, button'));
+                const currentIndex = focusableElements.indexOf(document.activeElement);
+
+                // Enter key - move forward
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+
+                    // If not last element, move to next
+                    if (currentIndex < focusableElements.length - 1) {
+                        focusableElements[currentIndex + 1].focus();
+                    }
+                    // If last element, submit the form
+                    else {
+                        form.submit();
+                    }
+                }
+
+                // Escape key - move backward
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+
+                    // If not first element, move to previous
+                    if (currentIndex > 0) {
+                        focusableElements[currentIndex - 1].focus();
+                    }
+                    // If first element, focus stays there
+                }
+            });
+        }
+    });
+</script>
+
 
 @endsection
