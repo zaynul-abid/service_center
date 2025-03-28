@@ -21,11 +21,7 @@
                     <i class="fas fa-chart-line me-2"></i> Change Status
                 </a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">
-                    <i class="fas fa-cog me-2"></i> Settings
-                </a>
-            </li>
+
 
             <li class="nav-item">
                 <a class="nav-link" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">

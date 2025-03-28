@@ -286,7 +286,7 @@
 
         <!-- Submit and Refresh Buttons -->
         <div class="text-center">
-            <button type="submit" class="btn btn-primary">Submit</button>
+            <button type="submit" class="btn btn-primary" id="submitButton">Submit</button>
             <button type="button" class="btn btn-secondary" onclick="resetForm()">Refresh</button>
 
         </div>
@@ -295,14 +295,15 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Get all focusable elements in the form
         const form = document.getElementById('serviceForm');
+
+        // Get all focusable input elements (exclude buttons)
         const focusableElements = form.querySelectorAll(
-            'input:not([type="hidden"]):not([type="submit"]), select, textarea, button'
+            'input:not([type="hidden"]):not([type="submit"]):not([type="button"]), select, textarea'
         );
 
-        // Convert NodeList to Array for easier manipulation
         const focusableArray = Array.from(focusableElements);
+        const lastInputField = focusableArray[focusableArray.length - 1]; // Get the last input field
 
         // Add event listeners to all focusable elements
         focusableArray.forEach((element, index) => {
@@ -311,9 +312,14 @@
                 if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
 
-                    // If in a textarea with Shift+Enter, allow line break
-                    if (e.target.tagName === 'TEXTAREA' && e.shiftKey) {
-                        return; // Allow default behavior for Shift+Enter in textareas
+                    // Skip navigation if the current element is a textarea (allow Shift+Enter for new lines)
+                    if (e.target.tagName === 'TEXTAREA') {
+                        return;
+                    }
+
+                    // If we're already on the last field, don't move focus
+                    if (element === lastInputField) {
+                        return;
                     }
 
                     // Find next focusable element
@@ -361,29 +367,11 @@
                     while (nextIndex < focusableArray.length) {
                         const nextElement = focusableArray[nextIndex];
                         if (nextElement.offsetParent !== null && !nextElement.disabled) {
-                            nextElement.focus();
-                            break;
-                        }
-                        nextIndex++;
-                    }
-                }
-            });
-        });
-
-        // Special handling for select dropdowns
-        const selects = form.querySelectorAll('select');
-        selects.forEach(select => {
-            select.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    // Move to next field
-                    const currentIndex = focusableArray.indexOf(select);
-                    let nextIndex = currentIndex + 1;
-                    while (nextIndex < focusableArray.length) {
-                        const nextElement = focusableArray[nextIndex];
-                        if (nextElement.offsetParent !== null && !nextElement.disabled) {
-                            nextElement.focus();
-                            break;
+                            // Don't move to buttons
+                            if (nextElement.tagName !== 'BUTTON') {
+                                nextElement.focus();
+                                break;
+                            }
                         }
                         nextIndex++;
                     }
@@ -392,5 +380,6 @@
         });
     });
 </script>
+
 
 @endsection

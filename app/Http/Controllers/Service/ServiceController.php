@@ -42,28 +42,53 @@ class ServiceController extends Controller
     {
         $user = Auth::user();
 
+        // Validation
+        $request->validate([
+            'vehicle_number' => 'required|string|max:255',
+            'vehicle_type' => 'required|string|max:100',
+            'vehicle_company' => 'required|string|max:100',
+            'vehicle_model' => 'required|string|max:100',
+            'fuel_type' => 'required|string|max:50',
+            'fuel_level' => 'nullable|integer|min:0|max:100',
+            'km_driven' => 'nullable|integer|min:0',
+            'customer_name' => 'required|string|max:255',
+            'place' => 'nullable|string|max:255',
+            'contact_number_1' => 'required|string|max:15',
+            'contact_number_2' => 'nullable|string|max:15',
+            'reference_number' => 'nullable|string|max:100',
+            'booking_date' => 'required|date',
+            'booking_time' => 'required|date_format:H:i',
+            'customer_complaint' => 'nullable|string',
+            'service_details' => 'nullable|string',
+            'remarks' => 'nullable|string|max:500',
+            'cost' => 'nullable|numeric|min:0',
+            'expected_delivery_date' => 'nullable|date',
+            'expected_delivery_time' => 'nullable|date_format:H:i',
+            'company_id' => 'nullable|exists:companies,id',
+            'photos.*' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',  // Validate each photo in the array
+        ]);
 
         // Handle Vehicle Creation or Update
         $vehicle = Vehicle::firstOrCreate(
             ['vehicle_number' => $request->vehicle_number],
-            [
-                'vehicle_type' => $request->vehicle_type,
-                'vehicle_company' => $request->vehicle_company,
-                'vehicle_model' => $request->vehicle_model,
-                'fuel_type' => $request->fuel_type,
-                'fuel_level' => $request->fuel_level,
-                'km_driven' => $request->km_driven,
-            ]
+            $request->only([
+                'vehicle_type',
+                'vehicle_company',
+                'vehicle_model',
+                'fuel_type',
+                'fuel_level',
+                'km_driven',
+            ])
         );
 
         // Handle Customer Creation or Update
         $customer = Customer::firstOrCreate(
             ['contact_number_1' => $request->contact_number_1],
-            [
-                'customer_name' => $request->customer_name,
-                'place' => $request->place,
-                'contact_number_2' => $request->contact_number_2,
-            ]
+            $request->only([
+                'customer_name',
+                'place',
+                'contact_number_2',
+            ])
         );
 
         // Handle Photos Upload
@@ -75,13 +100,12 @@ class ServiceController extends Controller
             }
         }
 
-        // Generate the Next Ordered and Small Booking ID (like B-1, B-2, B-3)
-        $lastService = Service::orderBy('id', 'desc')->first();  // Get the last inserted service record
+        // Generate the Next Ordered and Small Booking ID
+        $lastService = Service::withTrashed()->orderBy('id', 'desc')->first();  // Includes soft-deleted records
         $nextBookingNumber = $lastService ? $lastService->id + 1 : 1;  // Increment by 1
-        $nextBookingId = 'B-' . $nextBookingNumber;  // Create small and unique ID
+        $nextBookingId = 'B-' . $nextBookingNumber;
 
-        $companyId = auth()->user()->usertype == 'founder' ? $request->company_id : $user->company_id;
-
+        $companyId = $user->usertype == 'founder' ? $request->company_id : $user->company_id;
 
         // Create the Service Entry
         Service::create([
@@ -96,7 +120,7 @@ class ServiceController extends Controller
             'fuel_type' => $request->fuel_type,
             'fuel_level' => $request->fuel_level,
             'km_driven' => $request->km_driven,
-            'booking_id' => $nextBookingId,  // New small and unique booking ID
+            'booking_id' => $nextBookingId,
             'reference_number' => $request->reference_number,
             'booking_date' => $request->booking_date,
             'booking_time' => $request->booking_time,
@@ -113,12 +137,10 @@ class ServiceController extends Controller
         ]);
 
         // Redirect with Success Message
-        if ($user->isEmployee()) {
-            return redirect()->route('employee.dashboard')->with('success', 'Service record created successfully.');
-        } else {
-            return redirect()->route('services.index')->with('success', 'Service record created successfully.');
-        }
+        $redirectRoute = $user->isEmployee() ? 'employee.dashboard' : 'services.index';
+        return redirect()->route($redirectRoute)->with('success', 'Service record created successfully.');
     }
+
 
 
     /**
