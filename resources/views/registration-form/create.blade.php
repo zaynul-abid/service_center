@@ -258,15 +258,15 @@
                 @enderror
             </div>
             <div class="col-md-4">
-                <label for="expectedDeliveryDate" class="form-label">Expected Delivery Date</label>
+                <label for="expectedDeliveryDate" class="form-label required">Expected Delivery Date</label>
                 <input type="date" class="form-control @error('expectedDeliveryDate') is-invalid @enderror" id="expectedDeliveryDate" name="expected_delivery_date" value="{{ old('expectedDeliveryDate') }}">
                 @error('expectedDeliveryDate')
                     <div class="text-danger mt-1" style="font-size: 0.9rem;">{{ $message }}</div>
                 @enderror
             </div>
             <div class="col-md-4">
-                <label for="expectedDeliveryTime" class="form-label">Expected Delivery Time</label>
-                <input type="time" class="form-control @error('expectedDeliveryTime') is-invalid @enderror" id="expectedDeliveryTime" name="expected_delivery_time" value="{{ old('expectedDeliveryTime') }}">
+                <label for="expectedDeliveryTime" class="form-label ">Expected Delivery Time</label>
+                <input type="time" class="form-control @error('expectedDeliveryTime') is-invalid @enderror" id="expectedDeliveryTime" name="expected_delivery_time" value="{{ old('expectedDeliveryTime') }}" >
                 @error('expectedDeliveryTime')
                     <div class="text-danger mt-1" style="font-size: 0.9rem;">{{ $message }}</div>
                 @enderror
