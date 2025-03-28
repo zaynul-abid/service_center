@@ -293,4 +293,104 @@
     </form>
 </div>
 
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get all focusable elements in the form
+        const form = document.getElementById('serviceForm');
+        const focusableElements = form.querySelectorAll(
+            'input:not([type="hidden"]):not([type="submit"]), select, textarea, button'
+        );
+
+        // Convert NodeList to Array for easier manipulation
+        const focusableArray = Array.from(focusableElements);
+
+        // Add event listeners to all focusable elements
+        focusableArray.forEach((element, index) => {
+            // Enter key moves to next field
+            element.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+
+                    // If in a textarea with Shift+Enter, allow line break
+                    if (e.target.tagName === 'TEXTAREA' && e.shiftKey) {
+                        return; // Allow default behavior for Shift+Enter in textareas
+                    }
+
+                    // Find next focusable element
+                    let nextIndex = index + 1;
+                    while (nextIndex < focusableArray.length) {
+                        const nextElement = focusableArray[nextIndex];
+                        if (nextElement.offsetParent !== null && !nextElement.disabled) {
+                            nextElement.focus();
+                            break;
+                        }
+                        nextIndex++;
+                    }
+                }
+
+                // Esc key moves to previous field
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+
+                    // Find previous focusable element
+                    let prevIndex = index - 1;
+                    while (prevIndex >= 0) {
+                        const prevElement = focusableArray[prevIndex];
+                        if (prevElement.offsetParent !== null && !prevElement.disabled) {
+                            prevElement.focus();
+                            break;
+                        }
+                        prevIndex--;
+                    }
+                }
+            });
+        });
+
+        // Special handling for textareas - allow Shift+Enter for new lines
+        const textareas = form.querySelectorAll('textarea');
+        textareas.forEach(textarea => {
+            textarea.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && e.shiftKey) {
+                    // Allow default behavior (new line)
+                    return;
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    // Move to next field
+                    const currentIndex = focusableArray.indexOf(textarea);
+                    let nextIndex = currentIndex + 1;
+                    while (nextIndex < focusableArray.length) {
+                        const nextElement = focusableArray[nextIndex];
+                        if (nextElement.offsetParent !== null && !nextElement.disabled) {
+                            nextElement.focus();
+                            break;
+                        }
+                        nextIndex++;
+                    }
+                }
+            });
+        });
+
+        // Special handling for select dropdowns
+        const selects = form.querySelectorAll('select');
+        selects.forEach(select => {
+            select.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    // Move to next field
+                    const currentIndex = focusableArray.indexOf(select);
+                    let nextIndex = currentIndex + 1;
+                    while (nextIndex < focusableArray.length) {
+                        const nextElement = focusableArray[nextIndex];
+                        if (nextElement.offsetParent !== null && !nextElement.disabled) {
+                            nextElement.focus();
+                            break;
+                        }
+                        nextIndex++;
+                    }
+                }
+            });
+        });
+    });
+</script>
+
 @endsection

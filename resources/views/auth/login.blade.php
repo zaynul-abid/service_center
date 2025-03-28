@@ -48,7 +48,8 @@
         </div>
     </form>
 
-    <p>Dont have a account <a href="{{route('register')}}">
+{{--    <p>Dont have a account <a href="{{route('register')}}">--}}
 
-            Register </a></p>
+{{--            Register </a></p>--}}
 </x-guest-layout>
+
