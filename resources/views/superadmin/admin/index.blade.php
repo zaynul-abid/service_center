@@ -22,7 +22,7 @@
 
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h4>Company List</h4>
+            <h4>Admin List</h4>
             <a href="{{ route('superadmin-admins.create') }}" class="btn btn-primary">Create Admin</a>
         </div>
 

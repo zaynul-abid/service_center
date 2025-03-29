@@ -28,7 +28,7 @@
                     <th>Name</th>
                     <th>Designation</th>
                     <th>Phone Number</th>
-                    <th>Company</th>
+{{--                    <th>Company</th>--}}
                     <th>Email</th>
                     <th>Department</th>
 
@@ -42,7 +42,7 @@
                         <td>{{ $employee->name }}</td>
                         <td>{{ $employee->position }}</td>
                         <td>{{ $employee->phone }}</td>
-                        <td>{{ $employee->company->company_name }}</td>
+{{--                         <td>{{ $employee->company->company_name }}</td>--}}
                         <td>{{ $employee->email }}</td>
 
                         <td>{{ $employee->department ? $employee->department->name : 'N/A' }}</td> {{-- Department Name --}}

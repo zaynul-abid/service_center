@@ -29,6 +29,13 @@ Route::middleware(['auth', 'usertype:founder'])->group(function () {
 
     Route::get('/founder/dashboard',[DashboardController::class,'founderIndex'])->name('founder.dashboard');
 
+    Route::post('/companies/{id}/update-status', [FounderCompanyCreationController::class, 'updateStatus'])
+        ->name('companies.update-status');
+
+    Route::get('/companies/{company}/renew', [FounderCompanyCreationController::class, 'renew'])->name('companies.renew');
+    Route::post('/companies/{company}/renew', [FounderCompanyCreationController::class, 'processRenewal']);
+
+
     Route::prefix('founder')->group(function () {
 
         Route::resource('superadmins', FounderSuperadminController::class);

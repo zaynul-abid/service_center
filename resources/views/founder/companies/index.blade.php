@@ -43,6 +43,8 @@
                     <th>Plan</th>
                     <th>Subscription Start</th>
                     <th>Subscription End</th>
+                    <th>Status</th> <!-- Status Column -->
+                    <th>Company Key</th> <!-- Display the Company Key -->
                     <th>Actions</th>
                 </tr>
                 </thead>
@@ -60,6 +62,23 @@
                         </td>
                         <td>{{ $company->subscription_start_date }}</td>
                         <td>{{ $company->subscription_end_date }}</td>
+
+                        <!-- Status Form -->
+                        <td>
+                            <form action="{{ route('companies.update-status', $company->id) }}" method="POST">
+                                @csrf
+                                <select name="status" onchange="this.form.submit()">
+                                    <option value="active" {{ $company->status === 'active' ? 'selected' : '' }}>Active</option>
+                                    <option value="expired" {{ $company->status === 'expired' ? 'selected' : '' }}>Expired</option>
+                                </select>
+                            </form>
+                        </td>
+
+                        <!-- Displaying Company Key -->
+                        <td>
+                            {{ $company->company_key ?? 'Not Generated' }}
+                        </td>
+
                         <td>
                             <div class="d-flex gap-2">
                                 <a href="{{ route('companies.edit', $company->id) }}" class="btn btn-sm btn-outline-primary" title="Edit">
