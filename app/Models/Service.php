@@ -11,7 +11,13 @@ Service extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $dates = ['booking_date', 'expected_delivery_date'];
+    protected $dates = [
+        'booking_date',
+        'created_at',
+        'updated_at',
+        'expected_delivery_date'
+    ];
+
 
     protected $fillable = [
         'booking_id',
@@ -40,10 +46,14 @@ Service extends Model
         'employee_id',
         'service_status',
         'employee_remarks',
+        'status'
     ];
 
     protected $casts = [
-        'photos' => 'array', // Cast JSON photos field to an array
+        'photos' => 'array',
+            'booking_date' => 'date',
+            'expected_delivery_date' => 'date',
+
     ];
 
     public function employee()

@@ -55,6 +55,7 @@
                 <div class="collapse {{ request()->routeIs('admin.service.report') || request()->routeIs('admin.service.report') ? 'show' : '' }}" id="reportMenu">
                     <nav class="sb-sidenav-menu-nested nav">
                         <a class="nav-link {{ request()->routeIs('admin.service.report') ? 'active' : '' }}" href="{{ route('admin.service.report') }}">Service Report</a>
+                        <a class="nav-link {{ request()->routeIs('report.service.cost') ? 'active' : '' }}" href="{{ route('report.service.cost') }}">Cost Report</a>
                         <a class="nav-link {{ request()->routeIs('admin.employee.report') ? 'active' : '' }}" href="{{ route('admin.employee.report') }}">Employee Report</a>
                     </nav>
                 </div>

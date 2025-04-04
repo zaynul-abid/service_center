@@ -16,6 +16,7 @@ use App\Http\Controllers\Softdelete\SoftDeleteController;
 use App\Http\Controllers\Superadmin\AdminCreationController;
 use App\Http\Controllers\Superadmin\DepartmentController;
 use App\Http\Controllers\Superadmin\EmployeeController;
+use App\Http\Controllers\Company\CompanyRenewalController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -29,12 +30,13 @@ Route::middleware(['auth', 'usertype:founder'])->group(function () {
 
     Route::get('/founder/dashboard',[DashboardController::class,'founderIndex'])->name('founder.dashboard');
 
-    Route::post('/companies/{id}/update-status', [FounderCompanyCreationController::class, 'updateStatus'])
+    Route::post('/companies/{id}/update-status', [CompanyRenewalController::class, 'updateStatus'])
         ->name('companies.update-status');
 
-    Route::get('/companies/{company}/renew', [FounderCompanyCreationController::class, 'renew'])->name('companies.renew');
-    Route::post('/companies/{company}/renew', [FounderCompanyCreationController::class, 'processRenewal']);
+    Route::get('/companies/{company}/renew', [CompanyRenewalController::class, 'showRenewalForm'])->name('companies.renew');
+    Route::post('/companies/{company}/renew', [CompanyRenewalController::class, 'processRenewal'])->name('companies.process-renewal');
 
+    Route::resource('plans', \App\Http\Controllers\Company\PlanController::class);
 
     Route::prefix('founder')->group(function () {
 
@@ -105,6 +107,10 @@ Route::middleware(['auth', 'usertype:admin'])->group(function () {
     Route::get('/admin/employee/reports', [ReportController::class, 'showEmployeeReport'])->name('admin.employee.report');
     Route::get('/admin/reports/service/download', [ReportController::class, 'downloadServiceReport'])->name('report.service.download');
     Route::get('/admin/reports/employee/download', [ReportController::class, 'downloadEmployeeReport'])->name('report.employee.download');
+
+    Route::get('/report/service-cost', [ReportController::class, 'showServiceCost'])->name('report.service.cost');
+    Route::get('/report/service-cost/download', [ReportController::class, 'downloadServiceCostReport'])->name('cost.report.download');
+
 
     Route::get('/services/followup', [ServiceFollowUpController::class, 'followUp'])->name('service.followups');
 });

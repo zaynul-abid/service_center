@@ -36,6 +36,8 @@
         @method('PUT')
 
         <!-- Booking Date and Time -->
+
+        <input type="hidden" name="company_id" value="{{$service->company_id}}">
         <div class="row mb-3">
             <div class="col-md-6">
                 <label for="booking_date" class="form-label required">Booking Date</label>
@@ -235,7 +237,7 @@
             </div>
             <div class="col-md-4">
                 <label for="expectedDeliveryDate" class="form-label">Expected Delivery Date</label>
-                <input type="date" class="form-control @error('expected_delivery_date') is-invalid @enderror" id="expectedDeliveryDate" name="expected_delivery_date" value="{{ old('expected_delivery_date', $service->expected_delivery_date) }}">
+                <input type="date" class="form-control @error('expected_delivery_date') is-invalid @enderror" id="expectedDeliveryDate" name="expected_delivery_date" value="{{ old('expected_delivery_date', $service->expected_delivery_date)}}">
                 @error('expected_delivery_date'))
                     <div class="text-danger mt-1" style="font-size: 0.9rem;">{{ $message }}</div>
                 @enderror

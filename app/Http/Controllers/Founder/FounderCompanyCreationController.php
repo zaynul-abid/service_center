@@ -19,10 +19,11 @@ class FounderCompanyCreationController extends Controller
      */
     public function index()
     {
-        $companies = Company::orderBy('created_at', 'desc')->get();
-        return view('founder.companies.index', compact('companies'));
-    }
+        $companies = Company::all();
+        $plans = DB::table('plans')->where('status', 1)->get(); // Fetch active plans
 
+        return view('founder.companies.index', compact('companies', 'plans'));
+    }
     /**
      * Show the form for creating a new resource.
      */
@@ -88,7 +89,8 @@ class FounderCompanyCreationController extends Controller
      */
     public function edit(Company $company)
     {
-        return view('founder.companies.edit', compact('company'));
+        $plans = DB::table('plans')->where('status', 1)->get();
+        return view('founder.companies.edit', compact('company','plans'));
     }
 
     /**
@@ -96,25 +98,50 @@ class FounderCompanyCreationController extends Controller
      */
     public function update(Request $request, Company $company)
     {
-        $validatedData = $this->validateCompanyData($request, $company->id);
 
-        DB::beginTransaction();
+        $validatedData = $request->validate([
+            'company_name' => 'required|string|max:255',
+            'contact_number' => 'required|string|max:20|regex:/^[\d\s\+-]+$/',
+            'address' => 'required|string|min:10|max:500',
+            'registration_number' => 'required|string|max:50|unique:companies,registration_number,' . $company->id,
+            'plan_id' => 'required|exists:plans,id',
+            'plan_amount' => 'required|numeric|min:0',
+            'discount' => 'nullable|numeric|min:0',
+            'final_price' => 'required|numeric|min:0',
+            'subscription_start_date' => 'required|date|after_or_equal:today',
+            'subscription_end_date' => 'required|date|after:subscription_start_date',
+        ], [
+            'company_name.required' => 'Company name is required',
+            'contact_number.regex' => 'Please enter a valid phone number',
+            'address.min' => 'Address must be at least 10 characters',
+            'registration_number.unique' => 'This registration number already exists',
+            'plan_id.required' => 'Please select a subscription plan',
+            'plan_amount.required' => 'Please enter the plan amount',
+            'subscription_start_date.after_or_equal' => 'Start date cannot be in the past',
+            'subscription_end_date.after' => 'End date must be after start date',
+            'final_price.min' => 'Final price cannot be negative',
+            'discount.numeric' => 'Discount must be a valid number.',
+            'discount.min' => 'Discount cannot be negative.'
+        ]);
 
-        try {
-            $company->update($validatedData);
-            DB::commit();
 
-            return redirect()
-                ->route('companies.index')
-                ->with('success', 'Company updated successfully!');
+        // Update the company with validated data
+        $company->update([
+            'company_name' => $validatedData['company_name'],
+            'contact_number' => $validatedData['contact_number'],
+            'address' => $validatedData['address'],
+            'registration_number' => $validatedData['registration_number'],
+            'plan_id' => $validatedData['plan_id'],
+            'plan_amount' => $validatedData['plan_amount'],
+            'discount' => $validatedData['discount'] ?? 0,
+            'final_price' => $validatedData['final_price'],
+            'subscription_start_date' => $validatedData['subscription_start_date'],
+            'subscription_end_date' => $validatedData['subscription_end_date'],
+            'status' => $this->checkSubscriptionStatus($validatedData['subscription_end_date'])
+        ]);
 
-        } catch (Exception $e) {
-            DB::rollBack();
-            return redirect()
-                ->back()
-                ->withInput()
-                ->with('error', 'Failed to update company: ' . $e->getMessage());
-        }
+        return redirect()->route('companies.index')
+            ->with('success', 'Company updated successfully!');
     }
 
     /**
@@ -144,52 +171,13 @@ class FounderCompanyCreationController extends Controller
     /**
      * Validate company data
      */
-    protected function validateCompanyData(Request $request, $companyId = null)
-    {
-        return $request->validate([
-            'company_name' => 'required|string|max:255',
-            'contact_number' => 'required|string|max:20|regex:/^[\d\s\+-]+$/',
-            'address' => 'required|string|min:10|max:500',
-            'registration_number' => [
-                'required',
-                'string',
-                'max:50',
-                Rule::unique('companies')->ignore($companyId)
-            ],
-            'plan' => 'required|string', // Example plan types
-            'subscription_start_date' => 'required|date|after_or_equal:today',
-            'subscription_end_date' => 'required|date|after:subscription_start_date',
-        ], [
-            'company_name.required' => 'Please provide the company name',
-            'contact_number.regex' => 'Please enter a valid phone number',
-            'address.min' => 'Address should be at least 10 characters',
-            'registration_number.unique' => 'This registration number is already in use',
-            'subscription_start_date.after_or_equal' => 'Start date cannot be in the past',
-            'subscription_end_date.after' => 'End date must be after start date',
-            'plan.in' => 'Please select a valid plan type'
-        ]);
-    }
+
+
     private function checkSubscriptionStatus($endDate)
     {
         return now()->lessThan(Carbon::parse($endDate)) ? 'active' : 'expired';
     }
 
-    public function updateStatus(Request $request, $id)
-    {
-        $company = Company::findOrFail($id);
 
-        // Update status
-        $status = $request->input('status');
-        $company->status = $status;
-
-        // Generate and update company key on renewal
-        if ($status === 'active') {
-            $company->company_key = 'CK-' . strtoupper(Str::random(10));  // Generate a unique company key
-        }
-
-        $company->save();
-
-        return back()->with('success', 'Company status and key updated successfully!');
-    }
 
 }

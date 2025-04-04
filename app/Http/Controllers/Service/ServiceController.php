@@ -168,127 +168,112 @@ class ServiceController extends Controller
      */
     public function update(Request $request, $id)
     {
-        // Validate the incoming request data
-        $validatedData = $request->validate([
+
+        $user = Auth::user();
+
+        // Find the service record
+        $service = Service::findOrFail($id);
+
+        // Validation (same as store)
+        $request->validate([
             'vehicle_number' => 'required|string|max:255',
-            'vehicle_type' => 'required|string|max:255',
-            'vehicle_company' => 'nullable|string|max:255',
-            'vehicle_model' => 'nullable|string|max:255',
-            'fuel_type' => 'required|string|max:100',
-            'fuel_level' => 'nullable|numeric|min:0|max:100',
-            'km_driven' => 'nullable|numeric',
-            'contact_number_1' => 'required|string|max:15',
+            'vehicle_type' => 'required|string|max:100',
+            'vehicle_company' => 'required|string|max:100',
+            'vehicle_model' => 'required|string|max:100',
+            'fuel_type' => 'required|string|max:50',
+            'fuel_level' => 'nullable|integer|min:0|max:100',
+            'km_driven' => 'nullable|integer|min:0',
             'customer_name' => 'required|string|max:255',
             'place' => 'nullable|string|max:255',
+            'contact_number_1' => 'required|string|max:15',
             'contact_number_2' => 'nullable|string|max:15',
-            'reference_number' => 'nullable|string|max:255',
+            'reference_number' => 'nullable|string|max:100',
             'booking_date' => 'required|date',
             'booking_time' => 'required|date_format:H:i',
             'customer_complaint' => 'nullable|string',
             'service_details' => 'nullable|string',
-            'remarks' => 'nullable|string',
+            'remarks' => 'nullable|string|max:500',
             'cost' => 'nullable|numeric|min:0',
-            'expected_delivery_date' => 'required|date',
-            'expected_delivery_time' => 'required|date_format:H:i',
-            'status' => 'required|string|in:pending,in_progress,completed,cancelled', // Added status field
-            'photos.*' => 'nullable|image|max:2048', // Validate photos if uploaded
+            'expected_delivery_date' => 'nullable|date',
+            'expected_delivery_time' => 'required',
+            'company_id' => 'nullable|exists:companies,id',
+            'photos.*' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'status' => 'nullable|string|max:50', // Added status field for update
         ]);
 
-        $user = Auth::user();
+        // Handle Vehicle Update
+        $vehicle = Vehicle::firstOrCreate(
+            ['vehicle_number' => $request->vehicle_number],
+            $request->only([
+                'vehicle_type',
+                'vehicle_company',
+                'vehicle_model',
+                'fuel_type',
+                'fuel_level',
+                'km_driven',
+            ])
+        );
 
-        if (!$user->company_id) {
-            return redirect()->route('services.index')->with('error', 'You do not have permission to update a service record.');
-        }
+        // Handle Customer Update
+        $customer = Customer::firstOrCreate(
+            ['contact_number_1' => $request->contact_number_1],
+            $request->only([
+                'customer_name',
+                'place',
+                'contact_number_2',
+            ])
+        );
 
-        // Begin database transaction
-        DB::beginTransaction();
-        try {
-            // Find the service record to update
-            $service = Service::findOrFail($id);
-
-            // Update or Create Vehicle Data
-            $vehicle = Vehicle::updateOrCreate(
-                ['vehicle_number' => $validatedData['vehicle_number']],
-                [
-                    'vehicle_type' => $validatedData['vehicle_type'],
-                    'vehicle_company' => $validatedData['vehicle_company'],
-                    'vehicle_model' => $validatedData['vehicle_model'],
-                    'fuel_type' => $validatedData['fuel_type'],
-                    'fuel_level' => $validatedData['fuel_level'],
-                    'km_driven' => $validatedData['km_driven'],
-                ]
-            );
-
-            // Update or Create Customer Data
-            $customer = Customer::updateOrCreate(
-                ['contact_number_1' => $validatedData['contact_number_1']],
-                [
-                    'customer_name' => $validatedData['customer_name'],
-                    'place' => $validatedData['place'],
-                    'contact_number_2' => $validatedData['contact_number_2'],
-                ]
-            );
-
-            // Handle Photo Uploads
-            $photosArray = [];
-            if ($request->hasFile('photos')) {
-                // Delete old photos if necessary (optional)
-                if ($service->photos) {
-                    foreach (json_decode($service->photos) as $oldPhoto) {
-                        Storage::disk('public')->delete($oldPhoto);
-                    }
-                }
-
-                // Store new photos
-                foreach ($request->file('photos') as $photo) {
-                    $path = $photo->store('photos', 'public');
-                    $photosArray[] = $path;
-                }
-            } else {
-                // Retain existing photos if no new photos are uploaded
-                $photosArray = json_decode($service->photos, true) ?? [];
+        // Handle Photos Upload (append to existing photos)
+        $photosArray = json_decode($service->photos, true) ?? [];
+        if ($request->hasFile('photos')) {
+            foreach ($request->file('photos') as $photo) {
+                $path = $photo->store('photos', 'public');
+                $photosArray[] = $path;
             }
-
-            // Update Service Data
-            $service->update([
-                'vehicle_number' => $validatedData['vehicle_number'],
-                'contact_number_1' => $validatedData['contact_number_1'],
-                'customer_name' => $validatedData['customer_name'],
-                'place' => $validatedData['place'],
-                'contact_number_2' => $validatedData['contact_number_2'],
-                'vehicle_type' => $validatedData['vehicle_type'],
-                'vehicle_company' => $validatedData['vehicle_company'],
-                'vehicle_model' => $validatedData['vehicle_model'],
-                'fuel_type' => $validatedData['fuel_type'],
-                'fuel_level' => $validatedData['fuel_level'],
-                'km_driven' => $validatedData['km_driven'],
-                'reference_number' => $validatedData['reference_number'],
-                'booking_date' => $validatedData['booking_date'],
-                'booking_time' => $validatedData['booking_time'],
-                'customer_complaint' => $validatedData['customer_complaint'],
-                'service_details' => $validatedData['service_details'],
-                'remarks' => $validatedData['remarks'],
-                'cost' => $validatedData['cost'],
-                'expected_delivery_date' => $validatedData['expected_delivery_date'],
-                'expected_delivery_time' => $validatedData['expected_delivery_time'],
-                'status' => $validatedData['status'], // Added status field
-                'company_id' => $user->company_id,
-                'vehicle_id' => $vehicle->id,
-                'customer_id' => $customer->id,
-                'photos' => json_encode($photosArray), // Update photos
-            ]);
-
-            // Commit the transaction
-            DB::commit();
-
-            return redirect()->route('services.index')->with('success', 'Service record updated successfully.');
-        } catch (\Exception $e) {
-            // Rollback the transaction if any error occurs
-            DB::rollBack();
-            return redirect()->route('services.index')->with('error', 'Failed to update service record: ' . $e->getMessage());
         }
-    }
 
+        // Handle photo deletions if needed (you would need to pass deleted photo IDs in request)
+        if ($request->has('deleted_photos')) {
+            $photosArray = array_diff($photosArray, $request->deleted_photos);
+            // Optionally delete the files from storage here
+        }
+
+//        $companyId = $user->usertype == 'founder' ? $request->company_id : $user->company_id;
+
+        // Update the Service Entry
+        $service->update([
+            'vehicle_number' => $request->vehicle_number,
+            'contact_number_1' => $request->contact_number_1,
+            'customer_name' => $request->customer_name,
+            'place' => $request->place,
+            'contact_number_2' => $request->contact_number_2,
+            'vehicle_type' => $request->vehicle_type,
+            'vehicle_company' => $request->vehicle_company,
+            'vehicle_model' => $request->vehicle_model,
+            'fuel_type' => $request->fuel_type,
+            'fuel_level' => $request->fuel_level,
+            'km_driven' => $request->km_driven,
+            'reference_number' => $request->reference_number,
+            'booking_date' => $request->booking_date,
+            'booking_time' => $request->booking_time,
+            'customer_complaint' => $request->customer_complaint,
+            'service_details' => $request->service_details,
+            'remarks' => $request->remarks,
+            'cost' => $request->cost,
+            'expected_delivery_date' => $request->expected_delivery_date,
+            'expected_delivery_time' => $request->expected_delivery_time,
+            'company_id' => $request->company_id,
+            'vehicle_id' => $vehicle->id,
+            'customer_id' => $customer->id,
+            'photos' => json_encode($photosArray),
+            'status' => $request->status ?? $service->status, // Update status if provided
+        ]);
+
+        // Redirect with Success Message
+        $redirectRoute = $user->isEmployee() ? 'employee.dashboard' : 'services.index';
+        return redirect()->route($redirectRoute)->with('success', 'Service record updated successfully.');
+    }
     /**
      * Remove the specified resource from storage.
      */

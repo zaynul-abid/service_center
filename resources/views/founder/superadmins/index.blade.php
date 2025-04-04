@@ -1,6 +1,6 @@
 @extends('backend.layouts.app')
 
-@section('title','Company Creation')
+@section('title','Superadmin Creation')
 
 @section('navbar')
 @include('founder.partials.navbar')
@@ -10,8 +10,8 @@
 
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h4>Company List</h4>
-            <a href="{{ route('superadmin-admins.create') }}" class="btn btn-primary">Create SuperAdmin</a>
+            <h4>Superadmin List</h4>
+            <a href="{{ route('superadmins.create') }}" class="btn btn-primary">Create SuperAdmin</a>
         </div>
 
         <!-- Flash Messages -->

@@ -12,8 +12,19 @@ class Company extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $dates = ['deleted_at'];
 
+    protected $dates = [
+        'subscription_start_date',
+        'subscription_end_date',
+        'created_at',
+        'updated_at',
+        'deleted_at'
+    ];
+
+    protected $casts = [
+        'subscription_start_date' => 'datetime',
+        'subscription_end_date' => 'datetime',
+    ];
     protected $primaryKey = 'id';
 
     protected $fillable = [
@@ -30,6 +41,8 @@ class Company extends Model
         'discount',
         'subscription_start_date',
         'subscription_end_date',
+        'original_company_id',
+        'is_renewed' ,
         'reserve_1',
         'reserve_2',
         'reserve_3',
@@ -58,5 +71,27 @@ class Company extends Model
                 $company->status = 'expired';
             }
         });
+    }
+
+    // Relationship to original company
+    public function originalCompany()
+    {
+        return $this->belongsTo(Company::class, 'original_company_id');
+    }
+
+// Relationship to renewals
+    public function renewals()
+    {
+        return $this->hasMany(Company::class, 'original_company_id');
+    }
+
+    public function canBeRenewed()
+    {
+        return $this->status === 'expired' && !$this->is_renewed;
+    }
+
+    public function plan()
+    {
+        return $this->belongsTo(Plan::class);
     }
 }

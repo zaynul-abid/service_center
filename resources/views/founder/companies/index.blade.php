@@ -37,14 +37,14 @@
                 <tr>
                     <th>ID</th>
                     <th>Company Name</th>
-                    <th>Contact Number</th>
-                    <th>Address</th>
-                    <th>Registration Number</th>
+                    <th>Contact</th>
                     <th>Plan</th>
-                    <th>Subscription Start</th>
-                    <th>Subscription End</th>
-                    <th>Status</th> <!-- Status Column -->
-                    <th>Company Key</th> <!-- Display the Company Key -->
+                    <th>Plan Amount</th>
+                    <th>Discount</th>
+                    <th>Final Price</th>
+                    <th>Subscription Period</th>
+                    <th>Status</th>
+                    <th>Company Key</th>
                     <th>Actions</th>
                 </tr>
                 </thead>
@@ -55,36 +55,45 @@
                         <td>{{ $company->id }}</td>
                         <td>{{ $company->company_name }}</td>
                         <td>{{ $company->contact_number }}</td>
-                        <td>{{ Str::limit($company->address, 30) }}</td>
-                        <td>{{ $company->registration_number }}</td>
+
+                        <!-- Plan Information -->
                         <td>
-                            <span class="badge bg-primary">{{ $company->plan }}</span>
+                            <span class="badge bg-primary">{{ $company->plan->name }}</span>
                         </td>
-                        <td>{{ $company->subscription_start_date }}</td>
-                        <td>{{ $company->subscription_end_date }}</td>
+                        <td>₹{{ number_format($company->plan_amount, 2) }}</td>
+                        <td class="text-danger">-₹{{ number_format($company->discount, 2) }}</td>
+                        <td class="text-success fw-bold">₹{{ number_format($company->final_price, 2) }}</td>
+
+                        <!-- Subscription Period -->
+                        <td>
+                            {{ $company->subscription_start_date->format('d M Y') }}<br>
+                            to<br>
+                            {{ $company->subscription_end_date->format('d M Y') }}
+                        </td>
 
                         <!-- Status Form -->
                         <td>
                             <form action="{{ route('companies.update-status', $company->id) }}" method="POST">
                                 @csrf
-                                <select name="status" onchange="this.form.submit()">
+                                <select name="status" onchange="this.form.submit()" class="form-select form-select-sm">
                                     <option value="active" {{ $company->status === 'active' ? 'selected' : '' }}>Active</option>
                                     <option value="expired" {{ $company->status === 'expired' ? 'selected' : '' }}>Expired</option>
                                 </select>
                             </form>
                         </td>
 
-                        <!-- Displaying Company Key -->
+                        <!-- Company Key -->
                         <td>
-                            {{ $company->company_key ?? 'Not Generated' }}
+                            <code>{{ $company->company_key ?? 'N/A' }}</code>
                         </td>
 
+                        <!-- Actions -->
                         <td>
                             <div class="d-flex gap-2">
                                 <a href="{{ route('companies.edit', $company->id) }}" class="btn btn-sm btn-outline-primary" title="Edit">
                                     <i class="bi bi-pencil-square"></i>
                                 </a>
-                                <form action="{{ route('companies.destroy', $company->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this company?');">
+                                <form action="{{ route('companies.destroy', $company->id) }}" method="POST" onsubmit="return confirm('Are you sure?');">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">

@@ -37,14 +37,14 @@
                     <th>Assigned Employee</th>
                     <th>Status</th>
                     <th>Delivery Date</th>
-                
-                 
+
+
                 </tr>
             </thead>
             <tbody>
                 @foreach($services as $index => $service)
                 <tr>
-                    <td>{{ $loop->iteration }}</td> 
+                    <td>{{ $loop->iteration }}</td>
                     <td>{{ $service->booking_id }}</td>
                     <td>{{ $service->booking_date }}</td>
                     <td>{{ $service->customer_name }}</td>
@@ -56,16 +56,16 @@
                     <td>{{ $service->employee ? $service->employee->name : 'Not Assigned' }}</td>
                     <td>{{ $service->service_status }}</td>
                     <td>{{ $service->expected_delivery_date }}</td>
-                 
-                  
+
+
                     </tr>
                 @endforeach
             </tbody>
         </table>
 
-      
+
         <div class="mt-3">
-            <a href="{{ route('report.service.download') }}" class="btn btn-primary">Download PDF</a>
+            <a href="{{ route('cost.report.download') }}" class="btn btn-primary">Download PDF</a>
         </div>
     </div>
 </div>
