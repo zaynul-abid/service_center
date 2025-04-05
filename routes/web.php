@@ -63,10 +63,6 @@ Route::middleware(['auth', 'usertype:superadmin'])->group(function () {
         Route::resource('employees', EmployeeController::class);
     });
 
-//
-//    Route::get('/users/recover', [SoftDeleteController::class, 'index'])->name('admin.users.recover');
-//    Route::patch('/users/{id}/restore', [SoftDeleteController::class, 'restore'])->name('admin.users.restore');
-//    Route::delete('/users/{id}/force-delete', [SoftDeleteController::class, 'forceDelete'])->name('admin.users.force-delete');
 
 
     Route::prefix('softdelete')->name('softdelete.')->group(function () {

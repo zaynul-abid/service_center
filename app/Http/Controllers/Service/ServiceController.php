@@ -194,7 +194,7 @@ class ServiceController extends Controller
             'service_details' => 'nullable|string',
             'remarks' => 'nullable|string|max:500',
             'cost' => 'nullable|numeric|min:0',
-            'expected_delivery_date' => 'nullable|date',
+            'expected_delivery_date' => 'required |date|after_or_equal:booking_date',
             'expected_delivery_time' => 'required',
             'company_id' => 'nullable|exists:companies,id',
             'photos.*' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',

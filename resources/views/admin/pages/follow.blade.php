@@ -46,7 +46,7 @@
             <form action="{{ route('service.followups') }}" method="GET" class="mb-4 p-3 bg-light border rounded">
                 <div class="row g-2">
                     <div class="col-md-6">
-                        <input type="number" name="search_days" min="0" class="form-control" 
+                        <input type="number" name="search_days" min="0" class="form-control"
                                placeholder="Enter days (0 for overdue)" value="{{ request('search_days') }}">
                     </div>
                     <div class="col-md-2">
@@ -63,107 +63,59 @@
                             <th>Booking Date</th>
                             <th>Expected Delivery</th>
                             <th>Days Left</th> <!-- New Column -->
+                            <th>Employee Status</th>
                             <th>Service Status</th>
                             <th>Customer</th>
                             <th>Contact</th>
                             <th>Technician</th>
                         </tr>
                     </thead>
-                    {{-- <tbody>
+
+                    <tbody>
                         @php
-                            use Carbon\Carbon;
-                            $today = Carbon::today();
+                            $today = \Carbon\Carbon::today();
                         @endphp
-            
-                        @foreach($services as $service)
+                        @foreach ($services as $service)
                             @php
-                                $bookingDate = Carbon::parse($service->booking_date);
-                                $expectedDeliveryDate = Carbon::parse($service->expected_delivery_date);
-            
-                                // Calculate how many days are left (overdue will show negative days)
-                                $daysLeft = $expectedDeliveryDate->diffInDays($today, false); // Keep the sign (+/-)
+                                $daysLeft = $service->days_difference;
+
+                                if ($daysLeft < 0) {
+                                    // Overdue
+                                    $badgeClass = 'bg-danger';
+                                    $daysText = 'Overdue by ' . abs($daysLeft) . ' day'.(abs($daysLeft) !== 1 ? 's' : '');
+                                } elseif ($daysLeft == 0) {
+                                    // Due today
+                                    $badgeClass = 'bg-warning text-dark';
+                                    $daysText = 'Due today';
+                                } else {
+                                    // Future delivery
+                                    $badgeClass = 'bg-success';
+                                    $daysText = $daysLeft . ' day'.($daysLeft !== 1 ? 's' : '').' remaining';
+                                }
                             @endphp
-            
-                            <tr @if($daysLeft < 0) class="table-danger" @elseif($expectedDeliveryDate->isToday()) class="table-warning" @endif>
+
+                            <tr>
                                 <td>{{ $loop->iteration }}</td>
-                                <td>
-                                    {{ $bookingDate->format('d-M-Y') }}<br>
-                                    <small class="text-muted">
-                                        @if($bookingDate->isToday())
-                                            (Today)
-                                        @elseif($bookingDate->lt($today))
-                                            ({{ $bookingDate->diffInDays($today) }} days ago)
-                                        @else
-                                            (in {{ $bookingDate->diffInDays($today) }} days)
-                                        @endif
-                                    </small>
-                                </td>
-                                <td>
-                                    {{ $expectedDeliveryDate->format('d-M-Y') ?? 'N/A' }}<br>
-                                    @if($daysLeft < 0)
-                                        <span class="badge bg-danger text-white">Overdue by {{ abs($daysLeft) }} days</span>
-                                    @elseif($expectedDeliveryDate->isToday())
-                                        <span class="badge bg-warning text-dark">Due Today</span>
-                                    @else
-                                        <span class="badge bg-success text-white">{{ $daysLeft }} days remaining</span>
+                                <td>{{ \Carbon\Carbon::parse($service->booking_date)->format('d-M-Y') }}
+                                    @if(\Carbon\Carbon::parse($service->booking_date)->isToday())
+                                        <br><small>(Today)</small>
                                     @endif
                                 </td>
-            
-                                <!-- Modified "Days Left" Column -->
+                                <td>{{ \Carbon\Carbon::parse($service->expected_delivery_date)->format('d-M-Y') }}</td>
                                 <td>
-                                    @if($daysLeft < 0)
-                                        <span class="text-danger">{{ abs($daysLeft) }} days overdue</span> <!-- Overdue in Red -->
-                                    @elseif($daysLeft === 0)
-                                        <span class="text-warning">Due today</span>
-                                    @else
-                                        <span class="text-success">{{ $daysLeft }} days left</span> <!-- Remaining Days in Green -->
-                                    @endif
+                                    <span class="badge {{ $badgeClass }}">{{ $daysText }}</span>
                                 </td>
-            
                                 <td>{{ $service->service_status }}</td>
+                                <td>{{ $service->status }}</td>
                                 <td>{{ $service->customer_name }}</td>
                                 <td>{{ $service->contact_number_1 }}</td>
                                 <td>{{ $service->employee->name ?? 'Unassigned' }}</td>
                             </tr>
                         @endforeach
-                    </tbody> --}}
-                    <tbody>
-                        @php
-                            $today = \Carbon\Carbon::today();
-                        @endphp
-            
-                        @foreach ($services as $service)
-                            @php
-                                $expectedDeliveryDate = \Carbon\Carbon::parse($service->expected_delivery_date);
-                                $daysLeft = $expectedDeliveryDate->diffInDays($today, false); // Calculate days difference
-            
-                                // Determine if overdue or remaining days based on days difference
-                                if ($daysLeft < 0) {
-                                    $badgeClass = 'bg-success'; // Green badge for remaining days
-                                    $daysText = abs($daysLeft) . ' days remaining';
-                                } else {
-                                    $badgeClass = 'bg-danger'; // Red badge for overdue days
-                                    $daysText = 'Overdue by ' . $daysLeft . ' days';
-                                }
-                            @endphp
-            
-                            <tr>
-                                <td>{{ $loop->iteration }}</td>
-                                <td>{{ \Carbon\Carbon::parse($service->booking_date)->format('d-M-Y') }} <br><small>(Today)</small></td>
-                                <td>{{ $expectedDeliveryDate->format('d-M-Y') }}</td>
-                                <td>
-                                    <span class="badge {{ $badgeClass }}">{{ $daysText }}</span>
-                                </td>
-                                <td>{{ $service->service_status }}</td>
-                                <td>{{ $service->customer_name }}</td>
-                                <td>{{ $service->contact_number_1 }}</td>
-                                <td>{{$service->employee->name ?? 'Unassigned' }}</td>
-                            </tr>
-                        @endforeach
                     </tbody>
                 </table>
             </div>
-            
+
 
         </div>
     </div>

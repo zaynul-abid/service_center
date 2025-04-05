@@ -25,6 +25,7 @@ class Employee extends Model
         'user_id'
     ];
 
+    protected $dates = ['created_at'];
     protected $hidden = ['password'];
 
     public function company()

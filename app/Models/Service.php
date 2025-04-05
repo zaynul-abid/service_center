@@ -11,12 +11,12 @@ Service extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $dates = [
-        'booking_date',
-        'created_at',
-        'updated_at',
-        'expected_delivery_date'
-    ];
+        protected $dates = [
+            'booking_date',
+            'created_at',
+            'updated_at',
+            'expected_delivery_date'
+        ];
 
 
     protected $fillable = [

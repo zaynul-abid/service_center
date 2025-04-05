@@ -4,11 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Employee @yield('title')</title>
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
     <link href="{{ asset('employee_assets/css/styles.css') }}" rel="stylesheet" />
-    <script src="{{ asset('employee_assets/js/scripts.js') }}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <style>
         :root {
             --primary-color: #4361ee;
@@ -20,22 +21,28 @@
         body {
             background-color: #f4f6f9;
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
         .dashboard-wrapper {
             display: flex;
             min-height: 100vh;
+            position: relative;
         }
 
         .sidebar {
             width: 260px;
             background: white;
             box-shadow: 0 0 35px rgba(94, 94, 94, 0.1);
-            transition: all 0.3s;
+            transition: all 0.3s ease;
+            position: fixed;
+            height: 100vh;
+            z-index: 1000;
+            overflow-y: auto;
         }
 
         .sidebar.collapsed {
-            margin-left: -260px;
+            transform: translateX(-100%);
         }
 
         .sidebar-header {
@@ -51,12 +58,7 @@
             transition: all 0.3s;
         }
 
-        .nav-link:hover {
-            background: var(--primary-color);
-            color: white !important;
-        }
-
-        .nav-link.active {
+        .nav-link:hover, .nav-link.active {
             background: var(--primary-color);
             color: white !important;
         }
@@ -65,6 +67,13 @@
             flex: 1;
             padding: 20px;
             transition: all 0.3s;
+            margin-left: 150px;
+            width: calc(100% - 260px);
+        }
+
+        .main-content.collapsed {
+            margin-left: 0;
+            width: 100%;
         }
 
         .stat-card {
@@ -79,10 +88,40 @@
             transform: translateY(-5px);
         }
 
-        .avatar {
+        /* Mobile sidebar toggle button */
+        .sidebar-toggle {
+            display: none;
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 1100;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
             width: 40px;
             height: 40px;
-            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .sidebar-toggle {
+                display: flex;
+            }
         }
 
         /* Image Modal Styles */
@@ -117,154 +156,154 @@
             z-index: 1001;
         }
 
-        #imageModal .btn-close:hover {
-            opacity: 1;
-        }
-
-        @media (max-width: 768px) {
-            .sidebar {
-                position: fixed;
-                z-index: 1000;
-                height: 100vh;
-            }
-            .main-content {
-                margin-left: 0 !important;
-            }
-        }
+        /* Table styles */
         .service-table {
-        border-collapse: separate;
-        border-spacing: 0 15px;
-    }
-    
-    .service-table thead {
-        background: linear-gradient(45deg, #6c5ce7, #a8a4e6);
-        color: white;
-    }
+            border-collapse: separate;
+            border-spacing: 0 15px;
+        }
 
-    .service-table thead th {
-        border: none;
-        padding: 15px;
-        font-size: 0.9rem;
-        font-family: 'Inter', sans-serif;
-    }
+        .service-table thead {
+            background: linear-gradient(45deg, #6c5ce7, #a8a4e6);
+            color: white;
+        }
 
-    .service-table tbody tr {
-        background: white;
-        transition: all 0.3s ease;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.03);
-    }
+        .service-table thead th {
+            border: none;
+            padding: 15px;
+            font-size: 0.9rem;
+        }
 
-    .service-table tbody tr:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-    }
+        .service-table tbody tr {
+            background: white;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+        }
 
-    .service-table tbody td {
-        border: none;
-        padding: 15px;
-        vertical-align: middle;
-        font-size: 0.9rem;
-    }
+        .service-table tbody tr:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
 
-    .status-badge {
-        padding: 5px 12px;
-        border-radius: 20px;
-        font-size: 0.8rem;
-        font-weight: 500;
-    }
+        .service-table tbody td {
+            border: none;
+            padding: 15px;
+            vertical-align: middle;
+            font-size: 0.9rem;
+        }
 
-    .status-accepted { background: #e3f2fd; color: #1976d2; }
-    .status-in_progress { background: #fff3e0; color: #ef6c00; }
-    .status-completed { background: #e8f5e9; color: #2e7d32; }
-    .status-rejected { background: #ffebee; color: #c62828; }
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
 
-    .notes-textarea {
-        border-radius: 8px;
-        border: 1px solid #e0e0e0;
-        padding: 8px;
-        font-size: 0.85rem;
-        transition: border-color 0.3s ease;
-    }
+        .status-accepted { background: #e3f2fd; color: #1976d2; }
+        .status-in_progress { background: #fff3e0; color: #ef6c00; }
+        .status-completed { background: #e8f5e9; color: #2e7d32; }
+        .status-rejected { background: #ffebee; color: #c62828; }
 
-    .notes-textarea:focus {
-        border-color: #6c5ce7;
-        outline: none;
-    }
+        .notes-textarea {
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            padding: 8px;
+            font-size: 0.85rem;
+            transition: border-color 0.3s ease;
+        }
 
-    .update-btn {
-        padding: 6px 18px;
-        border-radius: 8px;
-        font-size: 0.85rem;
-        transition: all 0.3s ease;
-        background: #6c5ce7;
-        border: none;
-    }
+        .notes-textarea:focus {
+            border-color: #6c5ce7;
+            outline: none;
+        }
 
-    .update-btn:hover {
-        background: #5b4bc4;
-        transform: translateY(-1px);
-        box-shadow: 0 3px 8px rgba(108,92,231,0.3);
-    }
-</style>
+        .update-btn {
+            padding: 6px 18px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            background: #6c5ce7;
+            border: none;
+        }
+
+        .update-btn:hover {
+            background: #5b4bc4;
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(108,92,231,0.3);
+        }
+    </style>
 </head>
 <body>
-    <div class="dashboard-wrapper">
-        <!-- Sidebar -->
-        
-      @include('employees.partials.sidebar')
+<!-- Mobile Sidebar Toggle Button -->
+<button class="sidebar-toggle" id="mobileSidebarToggle">
+    <i class="fas fa-bars"></i>
+</button>
 
+<div class="dashboard-wrapper">
+    <!-- Sidebar -->
+    @include('employees.partials.sidebar')
 
-   
-
-        <!-- Main Content -->
-       @yield('content')
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        @yield('content')
     </div>
+</div>
 
-    <!-- Image Modal -->
+<!-- Image Modal -->
+@include('employees.partials.imagemodel')
 
+<!-- Bootstrap Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Custom JS -->
+<script src="{{ asset('employee_assets/js/scripts.js') }}"></script>
 
-   @include('employees.partials.imagemodel')
+<script>
+    // Toggle sidebar on mobile
+    document.getElementById('mobileSidebarToggle').addEventListener('click', function() {
+        document.querySelector('.sidebar').classList.toggle('show');
+    });
 
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', function(event) {
+        const sidebar = document.querySelector('.sidebar');
+        const toggleBtn = document.getElementById('mobileSidebarToggle');
 
-   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-   <script>
-       // Image Modal Function
-       function updateModalImage(src) {
-           document.getElementById('modalImage').src = src;
-       }
+        if (window.innerWidth <= 992 &&
+            !sidebar.contains(event.target) &&
+            event.target !== toggleBtn &&
+            !toggleBtn.contains(event.target)) {
+            sidebar.classList.remove('show');
+        }
+    });
 
-       // Sidebar Toggle
-       const toggleBtn = document.getElementById('toggleSidebar');
-       const sidebar = document.querySelector('.sidebar');
-       const mainContent = document.querySelector('.main-content');
+    // Image Modal Function
+    function updateModalImage(src) {
+        document.getElementById('modalImage').src = src;
+    }
 
-       toggleBtn.addEventListener('click', () => {
-           sidebar.classList.toggle('collapsed');
-           mainContent.classList.toggle('collapsed');
-           
-           if (window.innerWidth <= 768) {
-               new bootstrap.Offcanvas(sidebar).toggle();
-           }
-       });
+    // Active Nav Links
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', function() {
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            this.classList.add('active');
 
-       // Active Nav Links
-       document.querySelectorAll('.nav-link').forEach(link => {
-           link.addEventListener('click', function() {
-               document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-               this.classList.add('active');
-           });
-       });
+            // Close sidebar on mobile after navigation
+            if (window.innerWidth <= 992) {
+                document.querySelector('.sidebar').classList.remove('show');
+            }
+        });
+    });
 
-       // Search Functionality
-       document.querySelector('input[type="search"]').addEventListener('input', function(e) {
-           const searchTerm = e.target.value.toLowerCase();
-           document.querySelectorAll('tbody tr').forEach(row => {
-               const text = row.textContent.toLowerCase();
-               row.style.display = text.includes(searchTerm) ? '' : 'none';
-           });
-       });
-   </script>
+    // Search Functionality
+    const searchInput = document.querySelector('input[type="search"]');
+    if (searchInput) {
+        searchInput.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            document.querySelectorAll('tbody tr').forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+    }
+</script>
 </body>
-
-
 </html>

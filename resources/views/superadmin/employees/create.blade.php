@@ -139,38 +139,40 @@
             const form = document.getElementById('employeeForm');
 
             if (form) {
+                // Disable form submission on Enter key
                 form.addEventListener('keydown', function(e) {
-                    // Get all focusable elements in the form (inputs, selects, buttons)
-                    const focusableElements = Array.from(
-                        form.querySelectorAll('input, select, button, a.btn')
-                    );
+                    if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+                        e.preventDefault(); // Always prevent default Enter behavior
 
-                    // Find current focused element
-                    const currentIndex = focusableElements.indexOf(document.activeElement);
+                        const focusableElements = Array.from(
+                            form.querySelectorAll('input, select, button:not([type="submit"])')
+                        );
 
-                    // Enter key - move forward
-                    if (e.key === 'Enter' && currentIndex > -1) {
-                        e.preventDefault();
+                        const currentIndex = focusableElements.indexOf(document.activeElement);
 
-                        // If not last element, move to next
-                        if (currentIndex < focusableElements.length - 1) {
+                        // Move to next field if not the last one
+                        if (currentIndex > -1 && currentIndex < focusableElements.length - 1) {
                             focusableElements[currentIndex + 1].focus();
-                        }
-                        // If last element, submit the form
-                        else {
-                            form.submit();
                         }
                     }
 
                     // Escape key - move backward
-                    if (e.key === 'Escape' && currentIndex > -1) {
+                    if (e.key === 'Escape') {
                         e.preventDefault();
-
-                        // If not first element, move to previous
+                        const focusableElements = Array.from(
+                            form.querySelectorAll('input, select, button:not([type="submit"])')
+                        );
+                        const currentIndex = focusableElements.indexOf(document.activeElement);
                         if (currentIndex > 0) {
                             focusableElements[currentIndex - 1].focus();
                         }
                     }
+                });
+
+                // Explicit form submission via button click only
+                document.getElementById('submitBtn').addEventListener('click', function(e) {
+                    e.preventDefault(); // Prevent default button behavior
+                    form.submit(); // Manually submit the form
                 });
             }
         });

@@ -14,7 +14,7 @@ class ServiceFollowUpController extends Controller
     {
         try {
             $query = Service::with('employee')
-                ->selectRaw('*, DATEDIFF(expected_delivery_date, CURDATE()) as days_difference');
+                ->selectRaw('services.*, DATEDIFF(expected_delivery_date, CURDATE()) as days_difference');
 
             // Apply search filter if provided
             if ($request->filled('search_days')) {
