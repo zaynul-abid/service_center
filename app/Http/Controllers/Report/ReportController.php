@@ -11,43 +11,100 @@ use Illuminate\Http\Request;
 
 class ReportController extends Controller
 {
-    public function showServiceReport()
+    public function showServiceReport(Request $request)
     {
-        $services = Service::with('employee')->paginate(10);
-        return view('reports.service_report', compact('services'));
+        $query = Service::query();
+
+        // Date range filter
+        if ($request->has('start_date') && $request->has('end_date')) {
+            $query->whereBetween('booking_date', [
+                $request->start_date,
+                $request->end_date
+            ]);
+        }
+
+        // Status filter
+        if ($request->has('status') && $request->status != '') {
+            $query->where('status', $request->status);
+        }
+
+        $services = $query->paginate(10);
+
+        // Calculate service counts
+        $totalServices = $query->count();
+        $pendingServices = (clone $query)->where('status', 'pending')->count();
+        $completedServices = (clone $query)->where('status', 'completed')->count();
+
+        return view('reports.service_report', compact(
+            'services',
+            'totalServices',
+            'pendingServices',
+            'completedServices'
+        ));
+    }
+
+
+    public function downloadServiceReport(Request $request)
+    {
+        $query = Service::query();
+
+        if ($request->has('start_date') && $request->has('end_date')) {
+            $query->whereBetween('booking_date', [$request->start_date, $request->end_date]);
+        }
+
+        if ($request->has('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $services = $query->get();
+
+        $totalServices = $query->count();
+        $pendingServices = (clone $query)->where('status', 'pending')->count();
+        $completedServices = (clone $query)->where('status', 'completed')->count();
+
+        $pdf = PDF::loadView('reports.service_pdf', compact(
+            'services',
+            'totalServices',
+            'pendingServices',
+            'completedServices'
+        ));
+
+        return $pdf->download('service_report_'.now()->format('Y-m-d').'.pdf');
     }
 
     public function showEmployeeReport()
     {
-        $employees = Employee::with(['services' => function($query) {
-            $query->select('id', 'booking_id', 'employee_id', 'employee_remarks', 'created_at')
-                ->whereNotNull('created_at')
-                ->orderBy('created_at', 'desc');
-        }, 'department'])
+        $employees = Employee::with([
+            'services' => function($query) {
+                $query->select('id', 'booking_id', 'employee_id', 'employee_remarks', 'created_at')
+                    ->whereNotNull('employee_id')
+                    ->orderBy('created_at', 'desc');
+            },
+            'department'
+        ])
+            ->withCount(['services as assigned_services_count' => function($query) {
+                $query->whereNotNull('employee_id');
+            }])
             ->orderBy('name')
             ->paginate(10);
 
         return view('reports.employee_report', compact('employees'));
     }
 
-    public function downloadServiceReport()
-    {
-        $services = Service::with('employee')->get();
-
-
-        $pdf = Pdf::loadView('reports.service_pdf', compact('services'));
-
-        return $pdf->download('service_reports.pdf');
-    }
-
     public function downloadEmployeeReport()
     {
-
-        $employees = Employee::all();
+        $employees = Employee::with([
+            'department'
+        ])
+            ->withCount(['services as assigned_services_count' => function($query) {
+                $query->whereNotNull('employee_id');
+            }])
+            ->orderBy('name')
+            ->get();
 
         $pdf = Pdf::loadView('reports.employee_pdf', compact('employees'));
 
-        return $pdf->download('employee_report.pdf');
+        return $pdf->download('employee_report_'.now()->format('Y-m-d').'.pdf');
     }
 
     public function showServiceCost(Request $request)
@@ -94,8 +151,16 @@ class ReportController extends Controller
         $query = Service::query();
 
         // Apply date range filter if provided
-        if ($request->has('start_date') && $request->has('end_date')) {
-            $query->whereBetween('booking_date', [$request->start_date, $request->end_date]);
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $query->whereBetween('booking_date', [
+                Carbon::parse($request->start_date)->startOfDay(),
+                Carbon::parse($request->end_date)->endOfDay()
+            ]);
+        }
+
+        // Apply status filter if provided
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
         }
 
         $services = $query->get();
@@ -105,17 +170,22 @@ class ReportController extends Controller
         $pendingServiceCost = (clone $query)->where('status', 'pending')->sum('cost');
         $completedServiceCost = (clone $query)->where('status', 'completed')->sum('cost');
 
+        // Generate filename based on filters
+        $filename = 'service_cost_report_'.now()->format('Y-m-d');
+        if ($request->filled('start_date') || $request->filled('status')) {
+            $filename .= '_filtered';
+        }
 
         // Load the PDF view with filtered data
-        $pdf = PDF::loadView('reports.cost_pdf', compact(
-            'services',
-            'totalServiceCost',
-            'pendingServiceCost',
-            'completedServiceCost'
-        ));
+        $pdf = PDF::loadView('reports.cost_pdf', [
+            'services' => $services,
+            'totalServiceCost' => $totalServiceCost,
+            'pendingServiceCost' => $pendingServiceCost,
+            'completedServiceCost' => $completedServiceCost,
+            'filters' => $request->only(['start_date', 'end_date', 'status'])
+        ]);
 
-        // Download the PDF
-        return $pdf->download('service_cost_report.pdf');
+        return $pdf->download($filename.'.pdf');
     }
 
 }

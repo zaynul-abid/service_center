@@ -52,7 +52,7 @@ class DashboardController extends Controller
             $assignedServices = collect();
         };
 
-        return view('employees.pages.dashboard', compact('assignedServices', 'employee'));
+        return view('employees.pages.dashboard1', compact('assignedServices', 'employee'));
     }
 
 

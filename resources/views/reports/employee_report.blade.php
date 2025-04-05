@@ -21,9 +21,17 @@
                 <h4 class="mb-3 mb-md-0">
                     <i class="fas fa-users text-primary me-2"></i>Employee Report with Services
                 </h4>
-                <a href="{{ route('report.employee.download') }}" class="btn btn-primary">
-                    <i class="fas fa-download me-2"></i>Download PDF
-                </a>
+                <div class="d-flex align-items-center">
+                    <span class="badge bg-primary me-3">
+                        Total Employees: {{ $employees->total() }}
+                    </span>
+                    <span class="badge bg-success me-3">
+                        Active Assignments: {{ $employees->sum('assigned_services_count') }}
+                    </span>
+                    <a href="{{ route('report.employee.download') }}" class="btn btn-primary">
+                        <i class="fas fa-download me-2"></i>Download PDF
+                    </a>
+                </div>
             </div>
 
             <div class="card-body p-3 p-md-4">
@@ -37,7 +45,8 @@
                             <th class="px-2">Phone</th>
                             <th class="px-2">Email</th>
                             <th class="px-2">Department</th>
-                            <th class="pe-3">Assigned Services</th>
+                            <th class="px-2 text-center">Assigned</th>
+                            <th class="pe-3">Services</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -60,6 +69,11 @@
                                     @else
                                         <span class="badge bg-secondary py-1 px-2">N/A</span>
                                     @endif
+                                </td>
+                                <td class="px-2 text-center">
+                                    <span class="badge {{ $employee->assigned_services_count > 0 ? 'bg-success' : 'bg-light text-danger border' }}">
+                                        {{ $employee->assigned_services_count }}
+                                    </span>
                                 </td>
                                 <td class="pe-3">
                                     @if($employee->services->isNotEmpty())
@@ -111,7 +125,7 @@
 
                 @if($employees->hasPages())
                     <div class="mt-4 px-2">
-                        {{ $employees->links() }}
+                        {{ $employees->appends(request()->query())->links() }}
                     </div>
                 @endif
             </div>

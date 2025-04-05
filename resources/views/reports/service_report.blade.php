@@ -1,213 +1,300 @@
 @extends('backend.layouts.app')
-
-@if(auth()->user()->usertype === 'founder')
-    @section('navbar')
-        @include('founder.partials.navbar')
-    @endsection
-@elseif(auth()->user()->usertype === 'superadmin')
-    @section('navbar')
-        @include('superadmin.partials.navbar')
-    @endsection
-@elseif(auth()->user()->usertype === 'admin')
-    @section('navbar')
-        @include('admin.partials.navbar')
-    @endsection
-@endif
+@section('title', 'Service Analytics')
+@section('navbar')
+    @includeWhen(auth()->user()->usertype === 'founder', 'founder.partials.navbar')
+    @includeWhen(auth()->user()->usertype === 'superadmin', 'superadmin.partials.navbar')
+    @includeWhen(auth()->user()->usertype === 'admin', 'admin.partials.navbar')
+@endsection
 
 @section('content')
-    <div class="container-fluid px-3 px-lg-4 py-4">
-        <div class="card shadow-sm border-0">
-            <div class="card-header bg-white py-3 d-flex flex-column flex-md-row justify-content-between align-items-center">
-                <h4 class="mb-3 mb-md-0">
-                    <i class="fas fa-file-alt text-primary me-2"></i>Service Report
-                </h4>
-                <a href="{{ route('cost.report.download') }}" class="btn btn-primary">
-                    <i class="fas fa-download me-2"></i>Download PDF
-                </a>
+    <div class="container-fluid px-0 px-md-3">
+        <div class="report-container bg-white rounded-4 shadow-sm p-3 p-md-4 mb-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 mb-md-4 gap-2">
+                <div class="mb-2 mb-md-0">
+                    <h1 class="h3 fw-semibold mb-1">Service Analytics</h1>
+                    <p class="text-muted mb-0">Detailed breakdown of service requests and status metrics</p>
+                </div>
+                <div class="d-flex gap-2 w-100 w-md-auto">
+                    <a href="{{ route('report.service.download', request()->all()) }}" class="btn btn-sm btn-outline-dark rounded-pill px-3 flex-grow-1 flex-md-grow-0">
+                        <i class="bi bi-file-earmark-pdf me-1"></i> <span class="d-none d-md-inline">Export</span> Report
+                    </a>
+                </div>
             </div>
 
-            <div class="card-body p-3 p-md-4">
-                <div class="table-responsive rounded-3 border">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                        <tr>
-                            <th width="50" class="ps-3">#</th>
-                            <th class="px-2">Booking No.</th>
-                            <th class="px-2">Date</th>
-                            <th class="px-2">Customer</th>
-                            <th class="px-2">Vehicle</th>
-                            <th class="px-2">Model</th>
-                            <th class="px-2">Contact</th>
-                            <th class="px-2">Service</th>
-                            <th class="px-2">Cost</th>
-                            <th class="px-2">Employee</th>
-                            <th class="px-2">Status</th>
-                            <th class="pe-3">Delivery</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        @foreach($services as $service)
-                            <tr class="border-top">
-                                <td class="ps-3">{{ $loop->iteration }}</td>
-                                <td class="px-2 fw-medium">{{ $service->booking_id }}</td>
-                                <td class="px-2">{{ \Carbon\Carbon::parse($service->booking_date)->format('d/m/Y') }}</td>
-                                <td class="px-2">{{ $service->customer_name }}</td>
-                                <td class="px-2">{{ $service->vehicle_number }}</td>
-                                <td class="px-2">{{ $service->vehicle_model }}</td>
-                                <td class="px-2">{{ $service->contact_number_1 }}</td>
-                                <td class="px-2">
-                                    <div class="text-truncate" style="max-width: 150px;" data-bs-toggle="tooltip" title="{{ $service->service_details }}">
-                                        {{ $service->service_details }}
-                                    </div>
-                                </td>
-                                <td class="px-2 text-nowrap">₹{{ number_format($service->cost, 2) }}</td>
-                                <td class="px-2">
-                                    @if($service->employee)
-                                        <span class="badge bg-light text-dark py-1 px-2">
-                                    {{ $service->employee->name }}
-                                </span>
-                                    @else
-                                        <span class="badge bg-secondary py-1 px-2">Not Assigned</span>
-                                    @endif
-                                </td>
-                                <td class="px-2">
-                                    @php
-                                        $statusClass = [
-                                            'pending' => 'bg-warning',
-                                            'in_progress' => 'bg-info',
-                                            'completed' => 'bg-success',
-                                            'delivered' => 'bg-primary',
-                                            'cancelled' => 'bg-danger'
-                                        ][$service->service_status] ?? 'bg-secondary';
-                                    @endphp
-                                    <span class="badge {{ $statusClass }} text-capitalize py-1 px-2">
-                                    {{ str_replace('_', ' ', $service->service_status) }}
-                                </span>
-                                </td>
-                                <td class="pe-3">{{ \Carbon\Carbon::parse($service->expected_delivery_date)->format('d/m/Y') }}</td>
+            <!-- Filter Card -->
+            <div class="filter-card bg-light rounded-3 p-3 mb-4">
+                <form method="GET" action="{{ route('admin.service.report') }}" id="filterForm">
+                    <div class="row g-2 g-md-3 align-items-end">
+                        <div class="col-12 col-md-4">
+                            <label class="form-label small text-uppercase fw-semibold text-muted">Date Range</label>
+                            <div class="input-group">
+                                <input type="date" name="start_date" id="start_date"
+                                       class="form-control form-control-sm border-end-0 rounded-start"
+                                       value="{{ request('start_date') }}">
+                                <span class="input-group-text bg-white border-start-0 border-end-0">to</span>
+                                <input type="date" name="end_date" id="end_date"
+                                       class="form-control form-control-sm border-start-0 rounded-end"
+                                       value="{{ request('end_date') }}">
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label class="form-label small text-uppercase fw-semibold text-muted">Status</label>
+                            <select name="status" class="form-select form-select-sm">
+                                <option value="">All Statuses</option>
+                                <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                                <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-4 d-flex gap-2">
+                            <button type="submit" class="btn btn-sm btn-dark rounded-pill flex-grow-1">
+                                <i class="bi bi-funnel me-1"></i> <span class="d-none d-md-inline">Apply</span> Filters
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" id="resetFilter">
+                                <i class="bi bi-arrow-counterclockwise"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="row g-2 g-md-3 mb-4">
+                <div class="col-12 col-md-4">
+                    <div class="stat-card bg-white rounded-3 p-2 p-md-3 border h-100">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="text-uppercase small text-muted fw-semibold mb-1">Total Services</h6>
+                                <h3 class="mb-0">{{ number_format($totalServices) }}</h3>
+                            </div>
+                            <div class="icon-container bg-light rounded-circle p-2">
+                                <i class="bi bi-tools text-dark"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-4">
+                    <div class="stat-card bg-white rounded-3 p-2 p-md-3 border h-100">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="text-uppercase small text-muted fw-semibold mb-1">Pending</h6>
+                                <h3 class="mb-0">{{ number_format($pendingServices) }}</h3>
+                            </div>
+                            <div class="icon-container bg-light rounded-circle p-2">
+                                <i class="bi bi-hourglass-top text-dark"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-4">
+                    <div class="stat-card bg-white rounded-3 p-2 p-md-3 border h-100">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="text-uppercase small text-muted fw-semibold mb-1">Completed</h6>
+                                <h3 class="mb-0">{{ number_format($completedServices) }}</h3>
+                            </div>
+                            <div class="icon-container bg-light rounded-circle p-2">
+                                <i class="bi bi-check-circle text-dark"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Services Table - Dual View for Desktop/Mobile -->
+            <div class="table-card bg-white rounded-3 overflow-hidden border">
+                <!-- Desktop Table View with Proper Alignment -->
+                <div class="d-none d-md-block">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
+                            <tr>
+                                <th class="text-uppercase small text-muted fw-semibold py-3 ps-4" style="width: 5%">#</th>
+                                <th class="text-uppercase small text-muted fw-semibold py-3" style="width: 10%">Booking</th>
+                                <th class="text-uppercase small text-muted fw-semibold py-3" style="width: 10%">Date</th>
+                                <th class="text-uppercase small text-muted fw-semibold py-3" style="width: 15%">Customer</th>
+                                <th class="text-uppercase small text-muted fw-semibold py-3" style="width: 15%">Vehicle</th>
+                                <th class="text-uppercase small text-muted fw-semibold py-3" style="width: 25%">Service</th>
+                                <th class="text-uppercase small text-muted fw-semibold py-3 text-end" style="width: 10%">Amount</th>
+                                <th class="text-uppercase small text-muted fw-semibold py-3 pe-4" style="width: 10%">Status</th>
+                                <th class="text-uppercase small text-muted fw-semibold py-3 pe-4" style="width: 10%">Employee Status</th>
                             </tr>
-                        @endforeach
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                            @foreach($services as $service)
+                                <tr class="border-top">
+                                    <td class="ps-4 align-top">{{ $loop->iteration }}</td>
+                                    <td class="align-top">
+                                        <span class="d-inline-block bg-light rounded-pill px-2 py-1 small">
+                                            {{ $service->booking_id }}
+                                        </span>
+                                    </td>
+                                    <td class="align-top">{{ \Carbon\Carbon::parse($service->booking_date)->format('M d, Y') }}</td>
+                                    <td class="align-top">
+                                        <div class="d-flex flex-column">
+                                            <span class="fw-medium">{{ $service->customer_name }}</span>
+                                            <small class="text-muted">{{ $service->contact_number_1 }}</small>
+                                        </div>
+                                    </td>
+                                    <td class="align-top">
+                                        <div class="d-flex flex-column">
+                                            <span>{{ $service->vehicle_number }}</span>
+                                            <small class="text-muted">{{ $service->vehicle_model }}</small>
+                                        </div>
+                                    </td>
+                                    <td class="align-top">
+                                        <div class="service-details">
+                                            {{ $service->service_details }}
+                                        </div>
+                                    </td>
+                                    <td class="text-end fw-medium align-top">₹{{ number_format($service->cost, 2) }}</td>
+                                    <td class="pe-4 align-top">
+                                        @php
+                                            $statusClass = [
+                                                 'pending' => 'bg-warning-subtle text-warning',
+                                                 'completed' => 'bg-success-subtle text-success',
+                                                 'in_progress' => 'bg-info-subtle text-info'
+                                             ][$service->status] ?? 'bg-light text-dark';
+                                        @endphp
+                                        <span class="badge rounded-pill {{ $statusClass }} px-2 py-1">
+                                            {{ ucfirst(str_replace('_', ' ', $service->status)) }}
+                                        </span>
+                                    </td>
+
+                                    <td class="pe-4 align-top">
+                                        @php
+                                            $statusClass = [
+                                                 'pending' => 'bg-warning-subtle text-warning',
+                                                 'completed' => 'bg-success-subtle text-success',
+                                                 'in_progress' => 'bg-info-subtle text-info'
+                                             ][$service->service_status] ?? 'bg-light text-dark';
+                                        @endphp
+                                        <span class="badge rounded-pill {{ $statusClass }} px-2 py-1">
+                                            {{ ucfirst(str_replace('_', ' ', $service->service_status)) }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            @endforeach
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
-                @if($services->isEmpty())
-                    <div class="alert alert-info mt-4 mx-2">
-                        <i class="fas fa-info-circle me-2"></i> No service records found
-                    </div>
-                @endif
+                <!-- Mobile Card View -->
+                <div class="d-md-none">
+                    @foreach($services as $service)
+                        @php
+                            $statusClass = [
+                                 'pending' => 'bg-warning-subtle text-warning',
+                                 'completed' => 'bg-success-subtle text-success',
+                                 'in_progress' => 'bg-info-subtle text-info'
+                             ][$service->status] ?? 'bg-light text-dark';
+                        @endphp
 
-                @if($services->hasPages())
-                    <div class="mt-4 px-2">
-                        {{ $services->links() }}
-                    </div>
-                @endif
+                        <div class="service-card border-bottom p-3">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <span class="badge {{ $statusClass }} rounded-pill px-2 py-1 mb-1">
+                                        {{ ucfirst(str_replace('_', ' ', $service->status)) }}
+                                    </span>
+                                    <h6 class="mb-1 fw-semibold">Booking #{{ $service->booking_id }}</h6>
+                                    <small class="text-muted">{{ \Carbon\Carbon::parse($service->booking_date)->format('M d, Y') }}</small>
+                                </div>
+                                <div class="text-end">
+                                    <div class="fw-bold">₹{{ number_format($service->cost, 2) }}</div>
+                                    <small class="text-muted">Amount</small>
+                                </div>
+                            </div>
+
+                            <div class="service-details mb-2">
+                                <small class="text-muted">Service:</small>
+                                <div class="text-break">{{ $service->service_details }}</div>
+                            </div>
+
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <small class="text-muted">Customer:</small>
+                                    <div class="fw-medium">{{ $service->customer_name }}</div>
+                                    <small>{{ $service->contact_number_1 }}</small>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Vehicle:</small>
+                                    <div class="fw-medium">{{ $service->vehicle_number }}</div>
+                                    <small>{{ $service->vehicle_model }}</small>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
             </div>
+
+            <!-- Pagination -->
+            @if($services->hasPages())
+                <div class="mt-3 d-flex justify-content-center">
+                    {{ $services->links('pagination::bootstrap-4') }}
+                </div>
+            @endif
         </div>
     </div>
 
     <style>
-        .card {
-            border-radius: 0.75rem;
+        .stat-card {
+            transition: all 0.3s ease;
         }
-        .table {
-            --bs-table-bg: transparent;
-            --bs-table-striped-bg: rgba(0, 0, 0, 0.02);
-            font-size: 0.875rem;
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        .table thead th {
-            white-space: nowrap;
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            letter-spacing: 0.5px;
-            padding-top: 0.75rem;
-            padding-bottom: 0.75rem;
-            vertical-align: middle;
+
+        .icon-container {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .table td {
-            vertical-align: middle;
-            padding-top: 0.75rem;
-            padding-bottom: 0.75rem;
+
+        .service-details {
+            max-height: 60px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
         }
-        .table tr:first-child {
-            border-top: none;
-        }
-        .badge {
-            font-weight: 500;
-        }
-        @media (max-width: 991.98px) {
-            .table-responsive {
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-            }
-        }
+
         @media (max-width: 767.98px) {
-            .card-body {
-                padding: 1rem;
-            }
-            .table-responsive {
-                border: 0;
-            }
-            .table thead {
-                display: none;
-            }
-            .table tr {
-                display: block;
-                margin-bottom: 1.25rem;
-                border: 1px solid #dee2e6;
-                border-radius: 0.5rem;
-                padding: 0.5rem;
-            }
-            .table td {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 0.5rem;
-                border-bottom: 1px solid #f0f0f0;
-            }
-            .table td:before {
-                content: attr(data-label);
-                font-weight: 600;
-                margin-right: 1rem;
-                color: #6c757d;
-                text-transform: uppercase;
-                font-size: 0.7rem;
-                flex: 0 0 120px;
-            }
-            .table td:last-child {
-                border-bottom: 0;
-            }
-            .badge {
-                font-size: 0.7rem;
-                padding: 0.35em 0.65em;
+            .report-container {
+                padding: 1rem !important;
             }
         }
     </style>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize tooltips
-            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            tooltipTriggerList.map(function (tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl);
+            // Reset filter
+            document.getElementById('resetFilter').addEventListener('click', function() {
+                document.getElementById('filterForm').reset();
+                window.location.href = "{{ route('admin.service.report') }}";
             });
 
-            // Make table responsive by adding data-labels
-            function makeTableResponsive() {
-                if (window.innerWidth < 768) {
-                    document.querySelectorAll('.table thead th').forEach((th, index) => {
-                        const label = th.textContent.trim();
-                        document.querySelectorAll(`.table tbody td:nth-child(${index + 1})`).forEach(td => {
-                            td.setAttribute('data-label', label);
-                        });
-                    });
-                }
-            }
+            // Date validation
+            document.getElementById('filterForm').addEventListener('submit', function(e) {
+                const startDate = document.getElementById('start_date').value;
+                const endDate = document.getElementById('end_date').value;
 
-            // Run initially and on window resize
-            makeTableResponsive();
-            window.addEventListener('resize', makeTableResponsive);
+                if ((startDate && !endDate) || (!startDate && endDate)) {
+                    e.preventDefault();
+                    alert('Please select both start and end dates or clear both');
+                    return false;
+                }
+
+                if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+                    e.preventDefault();
+                    alert('Start date cannot be after end date');
+                    return false;
+                }
+            });
         });
     </script>
 @endsection
