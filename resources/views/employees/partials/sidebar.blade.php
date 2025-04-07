@@ -1,34 +1,39 @@
-<nav class="sidebar bg-white shadow-sm">
-    <div class="sidebar-header p-3 border-bottom">
-        <h4 class="mb-0 text-primary">
-            <i class="fas fa-user-tie me-2"></i>EMPLOYEE
-        </h4>
-    </div>
-    <div class="px-3 py-2">
-        <ul class="nav flex-column">
-            <li class="nav-item">
-                <a class="nav-link active" href="{{ route('employee.dashboard') }}">
-                    <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+<div id="layoutSidenav_nav">
+    <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+        <div class="sb-sidenav-menu">
+            <div class="nav">
+                <div class="sb-sidenav-menu-heading">{{ auth()->user()->name ?? 'Employee' }}</div>
+
+                <a class="nav-link {{ request()->routeIs('employee.dashboard') ? 'active' : '' }}" href="{{ route('employee.dashboard') }}">
+                    <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+                    Dashboard
                 </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{{ route('services.create') }}">
-                    <i class="fas fa-plus-circle me-2"></i> Service Create
+
+                <a class="nav-link {{ request()->routeIs('logedEmployee.showStatus') ? 'active' : '' }}" href="{{ route('logedEmployee.showStatus') }}">
+                    <div class="sb-nav-link-icon"><i class="fas fa-building"></i></div>
+                    Status
                 </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{{ route('logedEmployee.showStatus') }}">
-                    <i class="fas fa-exchange-alt me-2"></i> Change Status
+
+                <a class="nav-link {{ request()->routeIs('services.create') ? 'active' : '' }}" href="{{ route('services.create') }}">
+                    <div class="sb-nav-link-icon"><i class="fas fa-tools"></i></div>
+                    Service
                 </a>
-            </li>
-            <li class="nav-item mt-2 border-top pt-2">
-                <a class="nav-link text-danger" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                    <i class="fas fa-sign-out-alt me-2"></i> Logout
-                </a>
-                <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+            </div>
+        </div>
+
+        <!-- Sidebar Footer with Logout -->
+        <div class="sb-sidenav-footer">
+
+            <div class="sb-sidenav-footer">
+                {{-- <div class="small">Logged in as: <strong>{{ Auth::guard('admin')->user()->name ?? 'Administrator' }}</strong></div> --}}
+
+                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="mt-2">
                     @csrf
+                    <button type="submit" class="btn btn-danger btn-sm w-100">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
                 </form>
-            </li>
-        </ul>
-    </div>
-</nav>
+            </div>
+        </div>
+    </nav>
+</div>
