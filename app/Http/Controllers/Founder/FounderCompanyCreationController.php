@@ -149,24 +149,34 @@ class FounderCompanyCreationController extends Controller
      */
     public function destroy(Company $company)
     {
-        DB::beginTransaction();
+        // If the company is active, prevent deletion and show a warning
+        if ($company->status === 'active') {
+            return redirect()
+                ->route('companies.index')
+                ->with('warning', "Cannot delete '{$company->company_name}' because it is active.");
+        }
 
-        try {
+        // If the company is expired, allow deletion but warn about data loss
+        if ($company->status === 'expired') {
             $companyName = $company->company_name;
+
+            // Optionally, delete related data here before deleting the company
+            // Example: $company->employees()->delete();
+
             $company->delete();
-            DB::commit();
 
             return redirect()
                 ->route('companies.index')
-                ->with('success', "Company '{$companyName}' deleted successfully!");
-
-        } catch (Exception $e) {
-            DB::rollBack();
-            return redirect()
-                ->back()
-                ->with('error', 'Failed to delete company: ' . $e->getMessage());
+                ->with('warning', "Company '{$companyName}' and all related data have been deleted.");
         }
+
+        // Fallback message if status is something unexpected
+        return redirect()
+            ->route('companies.index')
+            ->with('error', "Invalid company status for deletion.");
     }
+
+
 
     /**
      * Validate company data

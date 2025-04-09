@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Company;
 
 use App\Http\Controllers\Controller;
 use App\Models\Plan;
+use App\Models\SubscriptionHistory;
 use Illuminate\Http\Request;
 
 class PlanController extends Controller
@@ -81,9 +82,26 @@ class PlanController extends Controller
      */
     public function destroy(Plan $plan)
     {
-        $plan->delete();
+        if ($plan->status == 1) {
+            return redirect()->route('plans.index')
+                ->with('warning', 'Active plans cannot be deleted.');
+        }
 
-        return redirect()->route('plans.index')
-            ->with('success', 'Plan deleted successfully.');
+        try {
+            $plan->delete();
+            return redirect()->route('plans.index')
+                ->with('success', 'Plan deleted successfully.');
+        } catch (\Exception $e) {
+            return redirect()->route('plans.index')
+                ->with('error', 'Failed to delete plan: ' . $e->getMessage());
+        }
     }
+
+
+    public function showSubscriptions()
+    {
+        $subscriptions = SubscriptionHistory::latest()->paginate(10);
+        return view('founder.plans.plan_history', compact('subscriptions'));
+    }
+
 }

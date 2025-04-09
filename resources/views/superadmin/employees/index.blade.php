@@ -30,20 +30,31 @@
         <a href="{{ route('employees.create') }}" class="btn btn-primary">Create Employee</a>
     </div>
 
+    <!-- Flash Messages -->
     @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <div class="alert alert-success alert-dismissible fade show mx-3 mt-3" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
             {{ session('success') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-@endif
+    @endif
 
-{{-- Error Message --}}
-@if (session('error'))
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <strong>Error!</strong> {{ session('error') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-@endif
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show mx-3 mt-3" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    @if(session('warning'))
+        <div class="alert alert-warning alert-dismissible fade show mx-3 mt-3" role="alert">
+            <i class="bi bi-exclamation-circle-fill me-2"></i>
+            {{ session('warning') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+</div>
 
 
     <div class="card-body">
@@ -69,7 +80,7 @@
                             <td>{{ $employee->name }}</td>
                             <td>{{ $employee->email }}</td>
                             <td>{{ $employee->phone ?? 'N/A' }}</td>
-                            <td>{{ $employee->department->name }}</td>
+                            <td>{{ $employee->department->name ?? 'N/A' }}</td>
 
                             <td>
                                 <span class="{{ empty($employee->position) ? 'text-danger' : '' }}">

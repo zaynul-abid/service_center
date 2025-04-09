@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Superadmin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Company;
+use App\Models\Service;
 use Illuminate\Http\Request;
 use App\Models\Employee;
 use App\Models\Department;
@@ -135,17 +136,31 @@ class EmployeeController extends Controller
         }
     }
 
-    public function destroy(Employee $employee)
+    public function destroy(string $id)
     {
+        $employee = Employee::findOrFail($id);
 
+        // Check for any ongoing or pending services
+        $hasOngoing = Service::where('employee_id', $employee->id)
+            ->whereNotIn('service_status', ['completed', 'cancelled'])
+            ->exists();
 
+        if ($hasOngoing) {
+            return redirect()->route('employees.index')
+                ->with('warning', "Cannot delete employee assigned to ongoing or pending services.");
+        }
 
-        // Delete the related User record
-        $employee->user()->delete();
+        try {
+            // Unassign employee from all services
+            Service::where('employee_id', $employee->id)->update(['employee_id' => null]);
 
-        // Then delete the Employee record
-        $employee->delete();
+            $employee->delete();
 
-        return redirect()->route('employees.index')->with('success', 'Employee deleted successfully!');
+            return redirect()->route('employees.index')
+                ->with('success', 'Employee deleted successfully.');
+        } catch (\Exception $e) {
+            return redirect()->route('employees.index')
+                ->with('error', 'Failed to delete employee: ' . $e->getMessage());
+        }
     }
 }

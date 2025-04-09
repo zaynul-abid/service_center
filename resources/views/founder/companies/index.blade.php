@@ -31,6 +31,15 @@
             </div>
         @endif
 
+        @if(session('warning'))
+            <div class="alert alert-warning alert-dismissible fade show mx-3 mt-3" role="alert">
+                <i class="bi bi-exclamation-circle-fill me-2"></i>
+                {{ session('warning') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
+
         <div class="card-body">
             <table id="datatablesSimple" class="table">
                 <thead class="table-light">
@@ -93,20 +102,47 @@
                                 <a href="{{ route('companies.edit', $company->id) }}" class="btn btn-sm btn-outline-primary" title="Edit">
                                     <i class="bi bi-pencil-square"></i>
                                 </a>
-                                <form action="{{ route('companies.destroy', $company->id) }}" method="POST" onsubmit="return confirm('Are you sure?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </form>
+                                <!-- Trigger button -->
+                                <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $company->id }}">
+                                    <i class="bi bi-trash"></i> Delete
+                                </button>
+
                             </div>
                         </td>
                     </tr>
+
+
+                    <!-- Modal -->
+                    <div class="modal fade" id="deleteModal{{ $company->id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ $company->id }}" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content rounded-3 shadow">
+                                <div class="modal-header bg-warning text-dark">
+                                    <h5 class="modal-title" id="deleteModalLabel{{ $company->id }}">Confirm Deletion</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    Are you sure you want to delete <strong>{{ $company->company_name }}</strong>?<br>
+                                    <span class="text-danger">This will remove all related data permanently.</span>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <form action="{{ route('companies.destroy', $company->id) }}" method="POST">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
                 @endforeach
                 </tbody>
             </table>
-        </div>
+
+
+                  </div>
     </div>
 
 @endsection

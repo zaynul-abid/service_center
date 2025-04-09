@@ -70,19 +70,41 @@ class SoftDeleteController extends Controller
     public function restoreEmployee($id)
     {
         $employee = Employee::onlyTrashed()->findOrFail($id);
-        $employee->restore();
+
+        \DB::transaction(function () use ($employee) {
+            $employee->restore();
+
+            // Restore the related user if soft-deleted
+            if ($employee->user_id) {
+                $user = User::onlyTrashed()->find($employee->user_id);
+                if ($user) {
+                    $user->restore();
+                }
+            }
+        });
 
         return redirect()->route('softdelete.index', ['tab' => 'employees'])
-            ->with('success', 'Employee restored successfully');
+            ->with('success', 'Employee and associated user restored successfully');
     }
 
     public function forceDeleteEmployee($id)
     {
         $employee = Employee::onlyTrashed()->findOrFail($id);
-        $employee->forceDelete();
+
+        \DB::transaction(function () use ($employee) {
+            // Force delete related user if it exists and is soft-deleted
+            if ($employee->user_id) {
+                $user = User::onlyTrashed()->find($employee->user_id);
+                if ($user) {
+                    $user->forceDelete();
+                }
+            }
+
+            $employee->forceDelete();
+        });
 
         return redirect()->route('softdelete.index', ['tab' => 'employees'])
-            ->with('success', 'Employee permanently deleted');
+            ->with('success', 'Employee and associated user permanently deleted');
     }
 
     public function restoreCustomer($id)

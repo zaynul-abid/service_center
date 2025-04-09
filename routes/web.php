@@ -17,6 +17,7 @@ use App\Http\Controllers\Superadmin\AdminCreationController;
 use App\Http\Controllers\Superadmin\DepartmentController;
 use App\Http\Controllers\Superadmin\EmployeeController;
 use App\Http\Controllers\Company\CompanyRenewalController;
+use \App\Http\Controllers\Company\PlanController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -36,7 +37,9 @@ Route::middleware(['auth', 'usertype:founder'])->group(function () {
     Route::get('/companies/{company}/renew', [CompanyRenewalController::class, 'showRenewalForm'])->name('companies.renew');
     Route::post('/companies/{company}/renew', [CompanyRenewalController::class, 'processRenewal'])->name('companies.process-renewal');
 
-    Route::resource('plans', \App\Http\Controllers\Company\PlanController::class);
+    Route::resource('plans', PlanController::class);
+    Route::get('/dashboard/subscriptions', [PlanController::class, 'showSubscriptions'])->name('plan_history.index');
+
 
     Route::prefix('founder')->group(function () {
 

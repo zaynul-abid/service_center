@@ -16,15 +16,18 @@ class EmployeeAssignController extends Controller
     public function showAssignPage()
     {
         try {
-            // Fetch all enquiries and employees for the assign page
-            $services = Service::all();
+            // Fetch only services that are NOT completed
+            $services = Service::where('status', '!=', 'Completed')->get();
+
             $employees = Employee::all();
+
             return view('assign.assign', compact('services', 'employees'));
         } catch (Exception $e) {
             Log::error('Error loading assign page: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Failed to load assign page.');
         }
     }
+
 
     public function assign(Request $request)
     {

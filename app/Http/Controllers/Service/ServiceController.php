@@ -281,11 +281,22 @@ class ServiceController extends Controller
     {
         $service = Service::findOrFail($id);
 
+        // Only allow deletion if status is 'completed' or 'cancelled'
+        if (!in_array($service->status, ['completed', 'cancelled'])) {
+            return redirect()
+                ->route('services.index')
+                ->with('warning', "Service cannot be deleted unless it is marked as completed or cancelled.");
+        }
+
         try {
-            $service->delete(); // Soft delete or permanent delete based on your setup
-            return redirect()->route('services.index')->with('success', 'Service record deleted successfully.');
+            $service->delete(); // Perform delete (soft or hard based on your setup)
+            return redirect()
+                ->route('services.index')
+                ->with('success', 'Service record deleted successfully.');
         } catch (\Exception $e) {
-            return redirect()->route('services.index')->with('error', 'Failed to delete service record: ' . $e->getMessage());
+            return redirect()
+                ->route('services.index')
+                ->with('error', 'Failed to delete service record: ' . $e->getMessage());
         }
     }
 }

@@ -59,9 +59,10 @@
                                     <form action="{{ route('departments.destroy', $department->id) }}" method="POST">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">
+                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('This action will delete the department and remove its association from all related employees. Do you wish to continue?')">
                                             Delete
                                         </button>
+
                                     </form>
                                 </div>
                             </td>
@@ -76,4 +77,4 @@
         </div>
     </div>
 
-@endsection 
+@endsection
