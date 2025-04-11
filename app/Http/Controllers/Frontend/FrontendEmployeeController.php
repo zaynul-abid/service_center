@@ -62,15 +62,17 @@ class FrontendEmployeeController extends Controller
     {
 
 
-        $request->validate([
-            'status' => 'required|string',
-            'notes' => 'nullable|string|max:500',
-        ]);
+//        $request->validate([
+//            'status' => 'required|string',
+//            'employee_remarks' => 'nullable|string|max:500',
+//        ]);
+
 
         try {
             $service = Service::findOrFail($id);
+
             $service->service_status = $request->status;
-            $service->employee_remarks = $request->notes;
+            $service->employee_remarks = $request->employee_remarks;
             $service->save();
 
             return redirect()->back()->with('success', 'Service status and notes updated successfully!');

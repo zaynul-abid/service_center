@@ -20,7 +20,25 @@ class ServiceController extends Controller
      */
     public function index()
     {
-        $services = Service::all(); // Fetch all service records
+        $search = request('search');
+        $status = request('status');
+
+        $services = Service::query()
+            ->when($search, function($query) use ($search) {
+                $query->where(function($q) use ($search) {
+                    $q->where('booking_id', 'like', "%$search%")
+                        ->orWhere('customer_name', 'like', "%$search%")
+                        ->orWhere('vehicle_number', 'like', "%$search%")
+                        ->orWhere('contact_number_1', 'like', "%$search%")
+                        ->orWhere('vehicle_model', 'like', "%$search%");
+                });
+            })
+            ->when($status, function($query) use ($status) {
+                $query->where('status', $status);
+            })
+            ->orderBy('created_at', 'desc')
+            ->paginate(10)
+            ->withQueryString();
 
         return view('services.pages.index', compact('services'));
     }

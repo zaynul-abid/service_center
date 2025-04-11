@@ -66,36 +66,23 @@
                                 {{ \Carbon\Carbon::parse($service->expected_delivery_date)->format('M d') }}
                             </td>
                             <td>
-                                <form method="POST" action="{{ route('employee.updateStatus', $service->id) }}"
-                                      class="status-form">
+                                <form method="POST" action="{{ route('employee.updateStatus', $service->id) }}" class="status-form">
                                     @csrf
                                     <select name="status" class="form-select form-select-sm status-select">
-                                        <option
-                                            value="Pending" {{ $service->service_status == 'Pending' ? 'selected' : '' }}>
-                                            Pending
-                                        </option>
-                                        <option
-                                            value="In Progress" {{ $service->service_status == 'In Progress' ? 'selected' : '' }}>
-                                            In Progress
-                                        </option>
-                                        <option
-                                            value="Completed" {{ $service->service_status == 'Completed' ? 'selected' : '' }}>
-                                            Completed
-                                        </option>
-                                        <option
-                                            value="Cancelled" {{ $service->service_status == 'Cancelled' ? 'selected' : '' }}>
-                                            Cancelled
-                                        </option>
+                                        <option value="Pending" {{ $service->service_status == 'Pending' ? 'selected' : '' }}>Pending</option>
+                                        <option value="In Progress" {{ $service->service_status == 'In Progress' ? 'selected' : '' }}>In Progress</option>
+                                        <option value="Completed" {{ $service->service_status == 'Completed' ? 'selected' : '' }}>Completed</option>
+                                        <option value="Cancelled" {{ $service->service_status == 'Cancelled' ? 'selected' : '' }}>Cancelled</option>
                                     </select>
                             </td>
                             <td class="notes-cell">
-                                @if($service->service_status != 'Completed')
-                                    <input type="text" name="notes" class="form-control form-control-sm notes-input"
-                                           value="{{ $service->notes }}" placeholder="Add notes...">
-                                @else
-                                    <span class="text-muted">N/A</span>
-                                    <input type="hidden" name="notes" value="{{ $service->notes }}">
-                                @endif
+                                <input
+                                    type="text"
+                                    name="employee_remarks"
+                                    class="form-control form-control-sm notes-input"
+                                    value="{{ $service->employee_remarks }}"
+                                    placeholder="Add notes..."
+                                    {{ $service->service_status == 'Completed' ? 'readonly style=background-color:#e9ecef;' : '' }}>
                             </td>
                             <td>
                                 <button type="submit" class="btn btn-sm btn-primary update-btn">
@@ -103,8 +90,7 @@
                                 </button>
                                 </form>
                                 @if(!empty($service->photos) && is_string($service->photos))
-                                    <button class="btn btn-sm btn-info ms-1" data-bs-toggle="modal"
-                                            data-bs-target="#photosModal{{ $service->id }}">
+                                    <button class="btn btn-sm btn-info ms-1" data-bs-toggle="modal" data-bs-target="#photosModal{{ $service->id }}">
                                         <i class="bi bi-images"></i>
                                     </button>
                                 @endif
@@ -138,8 +124,7 @@
                             <div class="row">
                                 @foreach(json_decode($service->photos, true) as $photo)
                                     <div class="col-md-4 mb-3">
-                                        <img src="{{ asset('storage/' . $photo) }}" class="img-fluid rounded"
-                                             alt="Service photo">
+                                        <img src="{{ asset('storage/' . $photo) }}" class="img-fluid rounded" alt="Service photo">
                                     </div>
                                 @endforeach
                             </div>
@@ -155,19 +140,15 @@
         document.getElementById('searchInput').addEventListener('keyup', function () {
             const input = this.value.toLowerCase();
             const rows = document.querySelectorAll('#serviceTable tbody tr');
-
             rows.forEach(row => {
                 const text = row.textContent.toLowerCase();
                 row.style.display = text.includes(input) ? '' : 'none';
             });
         });
 
-        // Toggle notes field visibility based on status selection
+        // Toggle notes field readonly state
         document.querySelectorAll('.status-select').forEach(select => {
-            // Initialize on page load
             toggleNotesField(select);
-
-            // Add change event listener
             select.addEventListener('change', function () {
                 toggleNotesField(this);
             });
@@ -175,21 +156,14 @@
 
         function toggleNotesField(selectElement) {
             const form = selectElement.closest('form');
-            const notesCell = form.closest('tr').querySelector('.notes-cell');
+            const notesInput = form.querySelector('.notes-input');
 
             if (selectElement.value === 'Completed') {
-                notesCell.innerHTML = `
-                    <span class="text-muted">N/A</span>
-                    <input type="hidden" name="notes" value="${form.querySelector('.notes-input')?.value || ''}">
-                `;
+                notesInput.removeAttribute('readonly');
+                notesInput.style.backgroundColor = '';
             } else {
-                // Only recreate if not already there to preserve any entered notes
-                if (!notesCell.querySelector('.notes-input')) {
-                    notesCell.innerHTML = `
-                        <input type="text" name="notes" class="form-control form-control-sm notes-input"
-                               value="${form.querySelector('input[name="notes"]')?.value || ''}" placeholder="Add notes...">
-                    `;
-                }
+                notesInput.removeAttribute('readonly');
+                notesInput.style.backgroundColor = '';
             }
         }
     </script>

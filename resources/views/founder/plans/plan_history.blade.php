@@ -69,7 +69,7 @@
                             {{ $sub->end_date ?? 'N/A' }}
                         </td>
                         <td>
-                                    <span class="badge bg-{{ $sub->is_renewal ? 'warning' : 'light' }}">
+                                    <span class="badge bg-{{ $sub->is_renewal ? 'warning' : 'danger' }}">
                                         {{ $sub->is_renewal ? 'Yes' : 'No' }}
                                     </span>
                         </td>

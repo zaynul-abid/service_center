@@ -67,7 +67,9 @@
 
                         <!-- Plan Information -->
                         <td>
-                            <span class="badge bg-primary">{{ $company->plan->name }}</span>
+                           <span class="badge bg-primary">
+                    {{ $company->plan?->name }}
+                            </span>
                         </td>
                         <td>₹{{ number_format($company->plan_amount, 2) }}</td>
                         <td class="text-danger">-₹{{ number_format($company->discount, 2) }}</td>

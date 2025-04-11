@@ -34,6 +34,7 @@ class Company extends Model
         'address',
         'registration_number',
         'plan_id',
+        'plan_description',
         'final_price',
         'plan_amount',
         'amount',

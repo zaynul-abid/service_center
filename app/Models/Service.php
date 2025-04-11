@@ -45,15 +45,14 @@ Service extends Model
         'photos',
         'employee_id',
         'service_status',
-        'employee_remarks',
-        'status'
+        'employee_remarks' ,
+        'status',
     ];
 
     protected $casts = [
         'photos' => 'array',
-            'booking_date' => 'date',
-            'expected_delivery_date' => 'date',
-
+        'booking_date' => 'date',
+        'expected_delivery_date' => 'date',
     ];
 
     public function employee()

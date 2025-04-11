@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Plan extends Model
 {
     use softDeletes;
+
+    protected $primaryKey = 'id';
+
+    protected $table = 'plans';
+
     protected $fillable = [
         'name',
         'amount',
@@ -15,9 +20,11 @@ class Plan extends Model
         'status'
     ];
 
+
     public function companies()
     {
-        return $this->hasMany(Company::class, 'company_plan_id');
+        return $this->hasMany(Company::class);
     }
+
 
 }

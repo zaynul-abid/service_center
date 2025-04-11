@@ -1,6 +1,6 @@
 @extends('backend.layouts.app')
 
-@section('title','Admin-create')
+@section('title','Admin-List')
 
 
 @if(auth()->user()->usertype === 'founder')
