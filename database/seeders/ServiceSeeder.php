@@ -33,7 +33,7 @@ class ServiceSeeder extends Seeder
             'Coolant flush'
         ];
 
-        for ($i = 0; $i < 500; $i++) {
+        for ($i = 0; $i < 20; $i++) {
             // 1. Create customer
             $customer = Customer::create([
                 'customer_name' => 'Customer ' . Str::random(5),

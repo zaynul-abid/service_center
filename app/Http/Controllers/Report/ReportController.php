@@ -15,33 +15,43 @@ class ReportController extends Controller
     {
         $query = Service::query();
 
-        // Date range filter
-        if ($request->has('start_date') && $request->has('end_date')) {
+        // Apply status filter if selected
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Apply date range filter if both dates are selected
+        if ($request->filled('start_date') && $request->filled('end_date')) {
             $query->whereBetween('booking_date', [
                 $request->start_date,
                 $request->end_date
             ]);
         }
 
-        // Status filter
-        if ($request->has('status') && $request->status != '') {
-            $query->where('status', $request->status);
-        }
+        // Clone query before pagination for counts
+        $baseQuery = clone $query;
 
+        // Paginate the result
         $services = $query->paginate(10);
 
-        // Calculate service counts
-        $totalServices = $query->count();
-        $pendingServices = (clone $query)->where('status', 'pending')->count();
-        $completedServices = (clone $query)->where('status', 'completed')->count();
+        // Count by status
+        $totalServices      = $baseQuery->count();
+        $pendingServices    = (clone $baseQuery)->where('status', 'pending')->count();
+        $completedServices  = (clone $baseQuery)->where('status', 'Completed')->count();
+        $cancelledServices  = (clone $baseQuery)->where('status', 'cancelled')->count();
+        $inProgressServices = (clone $baseQuery)->where('status', 'in_progress')->count();
 
         return view('reports.service_report', compact(
             'services',
             'totalServices',
             'pendingServices',
-            'completedServices'
+            'completedServices',
+            'cancelledServices',
+            'inProgressServices'
         ));
     }
+
+
 
 
     public function downloadServiceReport(Request $request)

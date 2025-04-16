@@ -107,6 +107,7 @@
                                 <th class="border-end">Delivery</th>
                                 <th class="border-end">Status</th>
                                 <th class="border-end">Cost</th>
+                                <th class="border-end">images</th>
                                 <th class="pe-3 text-end">Actions</th>
                             </tr>
                             </thead>
@@ -143,20 +144,33 @@
         </div>
     </div>
 
+
     <!-- Image Modal -->
     <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content border-0 shadow rounded-4">
                 <div class="modal-header border-0">
-                    <h5 class="modal-title fw-bold text-primary">Photo Preview</h5>
+                    <h5 class="modal-title fw-bold text-primary">Service Images</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body p-3 text-center">
-                    <img id="largeImage" src="" alt="Image Preview" class="img-fluid rounded-3 shadow-sm">
+                <div class="modal-body p-3">
+                    <div id="imageCarousel" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner" id="carousel-inner">
+                            <!-- Images will be loaded here dynamically -->
+                        </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#imageCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#imageCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    </div>>
 @endsection
 
 @push('scripts')
@@ -241,9 +255,53 @@
                 loadServices(page);
             });
 
-            // Image modal function
+            // Handle View Images button click
+            $(document).on('click', '.view-images-btn', function() {
+                var serviceId = $(this).data('service-id');
+                $('#loadingIndicator').show();
+
+                $.ajax({
+                    url: "{{ route('services.getImages', ':id') }}".replace(':id', serviceId),
+                    type: 'GET',
+                    success: function(response) {
+                        var carouselInner = $('#carousel-inner');
+                        carouselInner.empty();
+
+                        if (response.images && response.images.length > 0) {
+                            response.images.forEach(function(image, index) {
+                                var activeClass = index === 0 ? 'active' : '';
+                                carouselInner.append(`
+                            <div class="carousel-item ${activeClass}">
+                                <img src="${image.url}" class="d-block w-100 rounded-3" alt="Service image">
+<!--                                <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded-pill">-->
+                                    <p class="mb-0 mt-1">IMAGE ${index + 1} of ${response.images.length}</p>
+                                </div>
+                            </div>
+                        `);
+                            });
+
+                            // Initialize/reinitialize the carousel
+                            $('#imageCarousel').carousel();
+                            $('#imageModal').modal('show');
+                        } else {
+                            alert('No images found for this service.');
+                        }
+                    },
+                    error: function(xhr) {
+                        console.log(xhr.responseText);
+                        alert('An error occurred while loading images.');
+                    },
+                    complete: function() {
+                        $('#loadingIndicator').hide();
+                    }
+                });
+            });
+
+            // Handle individual image clicks (if you're keeping this functionality)
             window.showImage = function(src) {
+                // If you want to keep the simple image modal as fallback
                 document.getElementById('largeImage').src = src;
+                $('#imageModal').modal('show');
             };
         });
     </script>
@@ -278,6 +336,7 @@
         .bg-secondary-light {
             background-color: rgba(108, 117, 125, 0.1) !important;
         }
+
 
         /* Mobile card styles */
         @media (max-width: 767.98px) {

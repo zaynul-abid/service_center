@@ -47,6 +47,7 @@
                             <option value="Completed">Completed</option>
                             <option value="in_progress">In Progress</option>
                             <option value="cancelled">Cancelled</option>
+                            <option value="Unassigned">Unassigned</option>
                         </select>
                     </div>
                     <div class="row g-1 align-items-center" style="max-width: 320px;">
@@ -128,13 +129,7 @@
     <script>
 
 
-
         $(document).ready(function() {
-            // Select all checkbox
-            $(document).on('change', '#select-all', function() {
-                $('tbody input[type="checkbox"]').prop('checked', $(this).prop('checked'));
-            });
-
             // Function to apply filters
             function applyFilters() {
                 const status = $('#status-filter').val();
@@ -162,10 +157,6 @@
                         search: search,
                         ajax: true
                     },
-                    beforeSend: function() {
-                        // This is optional, just for logging
-                        console.log('Before sending request');
-                    },
                     success: function(response) {
                         // Log the response for debugging
                         console.log('Response received:', response);
@@ -183,13 +174,8 @@
                 });
             }
 
-            // Status filter
-            $('#status-filter').on('change', function() {
-                applyFilters();
-            });
-
-            // Date filter
-            $('#from-date-filter, #to-date-filter').on('change', function() {
+            // Handle filter changes
+            $('#status-filter, #from-date-filter, #to-date-filter').on('change', function() {
                 applyFilters();
             });
 
@@ -202,7 +188,7 @@
                 }, 500); // 500ms debounce time
             });
 
-            // Reset all filters
+            // Reset filters
             $('#reset-filters').on('click', function() {
                 $('#status-filter').val('');
                 $('#from-date-filter').val('');
@@ -250,6 +236,7 @@
                 // Handled by AJAX success/complete
             }
         });
+
 
     </script>
 

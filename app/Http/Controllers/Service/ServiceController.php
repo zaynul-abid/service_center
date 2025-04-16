@@ -322,4 +322,22 @@ class ServiceController extends Controller
                 ->with('error', 'Failed to delete service record: ' . $e->getMessage());
         }
     }
+
+    public function getImages($id)
+    {
+        $service = Service::findOrFail($id);
+        $images = [];
+
+        if (!empty($service->photos) && is_string($service->photos)) {
+            $photoPaths = json_decode($service->photos, true);
+            foreach ($photoPaths as $path) {
+                $images[] = [
+                    'url' => asset('storage/' . $path),
+                    'path' => $path
+                ];
+            }
+        }
+
+        return response()->json(['images' => $images]);
+    }
 }

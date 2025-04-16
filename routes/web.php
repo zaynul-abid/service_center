@@ -137,6 +137,7 @@ Route::middleware(['auth', 'usertype:employee'])->group(function () {
     Route::get('/employee/dashboard',[DashboardController::class,'employeeIndex'])->name('employee.dashboard');
 
     Route::resource('services', ServiceController::class);
+    Route::get('/services/get-images/{id}', [ServiceController::class, 'getImages'])->name('services.getImages');
 
     Route::get('/vehicles/search', [VehicleController::class, 'search'])->name('vehicles.search');
     Route::get('/customers/search', [CustomerController::class, 'search']);

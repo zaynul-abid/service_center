@@ -43,6 +43,8 @@
                                 <option value="">All Statuses</option>
                                 <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
                                 <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
+                                <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                                <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>In Progress</option>
                             </select>
                         </div>
                         <div class="col-12 col-md-4 d-flex gap-2">
@@ -98,7 +100,39 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="col-12 col-md-4">
+                    <div class="stat-card bg-white rounded-3 p-2 p-md-3 border h-100">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="text-uppercase small text-muted fw-semibold mb-1">In Progress Services</h6>
+                                <h3 class="mb-0">{{ number_format($inProgressServices) }}</h3>
+                            </div>
+                            <div class="icon-container bg-light rounded-circle p-2">
+                                <i class="bi bi-tools text-dark"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <div class="stat-card bg-white rounded-3 p-2 p-md-3 border h-100">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="text-uppercase small text-muted fw-semibold mb-1">Cancelled Services</h6>
+                                <h3 class="mb-0">{{ number_format($cancelledServices) }}</h3>
+                            </div>
+                            <div class="icon-container bg-light rounded-circle p-2">
+                                <i class="bi bi-tools text-dark"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+
             </div>
+
 
             <!-- Services Table - Dual View for Desktop/Mobile -->
             <div class="table-card bg-white rounded-3 overflow-hidden border">
@@ -289,10 +323,12 @@
                     return false;
                 }
 
-                if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+                if ((startDate && !endDate) || (!startDate && endDate)) {
                     e.preventDefault();
-                    alert('Start date cannot be after end date');
-                    return false;
+                    alert('Please select both Start Date and End Date for filtering.');
+                } else if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+                    e.preventDefault();
+                    alert('Start Date cannot be after End Date.');
                 }
             });
         });

@@ -18,13 +18,19 @@ class EmployeeAssignController extends Controller
         try {
             $query = Service::query();
 
-
             // Apply filters if they exist in the request
             if ($request->ajax()) {
+                // Filter by status
                 if ($request->has('status') && $request->status) {
-                    $query->where('status', $request->status);
+                    if ($request->status == 'Unassigned') {
+                        // Filter services with no employee assigned
+                        $query->whereNull('employee_id');
+                    } else {
+                        $query->where('status', $request->status);
+                    }
                 }
 
+                // Filter by date range
                 if ($request->has('from_date') && $request->from_date) {
                     $query->whereDate('booking_date', '>=', $request->from_date);
                 }
@@ -33,6 +39,7 @@ class EmployeeAssignController extends Controller
                     $query->whereDate('booking_date', '<=', $request->to_date);
                 }
 
+                // Filter by search term
                 if ($request->has('search') && $request->search) {
                     $search = $request->search;
                     $query->where(function($q) use ($search) {
@@ -45,24 +52,31 @@ class EmployeeAssignController extends Controller
                             });
                     });
                 }
+
+                // Paginate the results
                 $services = $query->paginate(10);
+
+                // Return the HTML response for the AJAX request
                 return response()->json([
                     'html' => view('assign.table_rows', compact('services'))->render(),
                     'pagination' => (string)$services->links('pagination::bootstrap-5')
                 ]);
             }
 
+            // Default view load (non-AJAX request)
             $services = $query->paginate(10);
             $employees = Employee::all();
 
             return view('assign.assign', compact('services', 'employees'));
         } catch (Exception $e) {
+            // Handle any exceptions and log the error
             Log::error('Error loading assign page: ' . $e->getMessage());
             return $request->ajax()
                 ? response()->json(['error' => 'Failed to load data'], 500)
                 : redirect()->back()->with('error', 'Failed to load assign page.');
         }
     }
+
 
 
     public function assign(Request $request)

@@ -38,6 +38,18 @@
                 <strong>Cost:</strong> ₹{{ number_format($service->cost, 2) }}
             </div>
 
+
+            <div class="mb-2">
+                @if (!empty($service->photos) && is_string($service->photos))
+                    <button class="btn btn-sm btn-outline-secondary view-images-btn"
+                            data-service-id="{{ $service->id }}">
+                        <i class="bi bi-images me-1"></i> View Images
+                    </button>
+                @else
+                    <span class="text-muted small">No images</span>
+                @endif
+            </div>
+
             <div class="d-flex justify-content-end gap-2 mt-2">
                 <a href="{{ route('services.edit', $service->id) }}"
                    class="btn btn-sm btn-outline-primary rounded-pill px-3"
