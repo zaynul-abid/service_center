@@ -16,7 +16,7 @@
                     </div>
 
                     <div class="card-body">
-                        <form action="{{ route('plans.update', $plan->id) }}" method="POST">
+                        <form id="editPlanForm" action="{{ route('plans.update', $plan->id) }}" method="POST">
                             @csrf
                             @method('PUT')
 
@@ -61,3 +61,18 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.document.getElementById('editPlanForm'); // or use a specific ID if needed
+
+            form.addEventListener('keydown', function (event) {
+                if (event.key === 'Enter' && event.target.nodeName !== 'TEXTAREA') {
+                    event.preventDefault();
+                }
+            });
+        });
+    </script>
+
+@endpush

@@ -5,10 +5,7 @@
 <div class="container">
     <h2>Edit Vehicle Service</h2>
 
-    <!-- Display Current Date and Time -->
-    <div class="current-time">
-        <strong>Date:</strong> <span id="currentDateTime"></span>
-    </div>
+
 
     <!-- Header Image -->
     <div class="header-image">
@@ -70,7 +67,7 @@
             <div class="col-md-6">
                 <label for="vehicleNumber" class="form-label required">Vehicle Number</label>
                 <input type="text" class="form-control" id="vehicleNumber" name="vehicle_number" placeholder="Enter Vehicle Number" value="{{ old('vehicle_number', $service->vehicle_number) }}" required>
-            
+
                 <ul id="vehicleSuggestions" style="display:none; list-style:none; padding-left:0; border:1px solid #ccc;">
                     <!-- Suggestions will be shown here dynamically -->
                 </ul>
@@ -95,17 +92,17 @@
             <div class="col-md-6" style="position: relative;">
                 <label for="vehicleCompany" class="form-label required">Vehicle Company</label>
                 <input type="text" class="form-control" id="vehicleCompany" name="vehicle_company" placeholder="Enter Vehicle Company" value="{{ old('vehicle_company', $service->vehicle_company) }}" required>
-            
+
                 <!-- Suggestions List -->
                 <ul id="companySuggestions" style="display:none; list-style:none; padding-left:0;  border:1px solid #ccc;">
                     <!-- Dynamically added suggestions will have the same width as the input -->
                 </ul>
             </div>
-            
+
             <div class="col-md-6" style="position: relative;">
                 <label for="vehicleModel" class="form-label required">Vehicle Model</label>
                 <input type="text" class="form-control" id="vehicleModel" name="vehicle_model" placeholder="Enter Vehicle Model" value="{{ old('vehicle_model', $service->vehicle_model) }}" required>
-            
+
                 <!-- Suggestions List -->
                 <ul id="modelSuggestions" style="display:none; list-style:none; padding-left:0; border:1px solid #ccc;">
                     <!-- Model suggestions will be dynamically inserted here -->
@@ -153,30 +150,30 @@
             <div class="col-md-6">
                 <label for="customerName" class="form-label required">Customer Name</label>
                 <input type="text" class="form-control" id="customerName" name="customer_name" placeholder="Enter Customer Name" value="{{ old('customer_name', $service->customer_name) }}" required>
-                
+
                 <ul id="customerSuggestions" style="display:none; list-style:none; padding-left:0; border:1px solid #ccc;">
                     <!-- Customer suggestions will be shown dynamically here -->
                 </ul>
             </div>
-        
+
             <div class="col-md-6">
                 <label for="contactNumber1" class="form-label required">Contact Number 1</label>
                 <input type="tel" class="form-control" id="contactNumber1" name="contact_number_1" placeholder="Enter Contact Number 1" value="{{ old('contact_number_1', $service->contact_number_1) }}" required>
             </div>
         </div>
-        
+
         <div class="row mb-3">
             <div class="col-md-6">
                 <label for="contactNumber2" class="form-label">Contact Number 2</label>
                 <input type="tel" class="form-control" id="contactNumber2" name="contact_number_2" placeholder="Enter Contact Number 2" value="{{ old('contact_number_2', $service->contact_number_2) }}">
             </div>
-        
+
             <div class="col-md-6">
                 <label for="place" class="form-label">Place</label>
                 <input type="text" class="form-control" id="place" name="place" placeholder="Enter Place" value="{{ old('place', $service->place) }}">
             </div>
         </div>
-        
+
 
         <h6 class="mt-4">SERVICE DETAILS</h6>
         <hr>

@@ -163,4 +163,25 @@ class EmployeeController extends Controller
                 ->with('error', 'Failed to delete employee: ' . $e->getMessage());
         }
     }
+
+    public function getServices($id)
+    {
+
+
+        $employee = Employee::with('services')->findOrFail($id);
+
+
+        $services = $employee->services->map(function ($service) {
+            return [
+                'booking_id' => $service->booking_id,
+                'employee_remarks' => $service->employee_remarks ?? 'No Remarks',
+                'vehicle_number' => $service->vehicle_number ?? 'No Vehicle Number',
+                'customer_name' => $service->customer_name ?? 'No Customer Name',
+                'service_status' => $service->service_status ?? 'No Service Status',
+
+            ];
+        });
+
+        return response()->json($services);
+    }
 }

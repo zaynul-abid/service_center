@@ -93,12 +93,9 @@
 
                             <td>
                                 @if($employee->services->isNotEmpty())
-                                    @foreach($employee->services as $service)
-                                        <div class="d-flex align-items-center mb-2">
-                                            <span class="badge bg-primary me-2">{{ $service->booking_id }}</span>
-                                            <p class="m-0">{{ $service->employee_remarks ?? 'No Remarks' }}</p>
-                                        </div>
-                                    @endforeach
+                                    <button class="btn btn-sm btn-primary view-status-btn" data-id="{{ $employee->id }}">View</button>
+
+
                                 @else
                                     <span class="text-danger">No Services Assigned</span>
                                 @endif
@@ -129,9 +126,134 @@
                 </table>
             </div>
 
-            <!-- Pagination -->
+    <div class="modal fade" id="employeeServicesModal" tabindex="-1" aria-labelledby="employeeServicesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content shadow-lg border-0">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title">Employee Services</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Loading indicator -->
+                    <div id="loadingIndicator" class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Loading services...</p>
+                    </div>
+
+                    <!-- Services Table (initially hidden) -->
+                    <div id="servicesContainer" style="display: none;">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover mb-0 shadow-sm">
+                                <thead class="table-light">
+                                <tr>
+                                    <th>Booking ID</th>
+                                    <th>Employee Remarks</th>
+                                    <th>Vehicle Number</th>
+                                    <th>Customer Name</th>
+                                    <th>Service Status</th>
+                                </tr>
+                                </thead>
+                                <tbody id="servicesList"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <!-- Close table button (initially hidden) -->
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close Modal</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
             {{ $employees->links() }}
         </div>
     </div>
 </div>
+<script>
+    $(document).on('click', '.view-status-btn', function() {
+        let employeeId = $(this).data('id');
+        console.log('Clicked! Employee ID:', employeeId);
+
+        // Show loading indicator
+        $('#loadingIndicator').show();
+        $('#servicesContainer').hide();
+        $('#closeTableBtn').hide();
+
+        // Use the Blade route() helper to generate the correct URL
+        let url = '{{ route("employee.services", ":id") }}'.replace(':id', employeeId);
+
+        // Make an AJAX request to fetch the services data
+        $.ajax({
+            url: url,
+            type: 'GET',
+            success: function(response) {
+                // Hide loading indicator
+                $('#loadingIndicator').hide();
+
+                // Clear previous content
+                $('#servicesList').empty();
+
+                if (response.length > 0) {
+                    // Populate the table
+                    response.forEach(function(service) {
+                        let serviceRow = `
+                        <tr>
+                            <td>${service.booking_id}</td>
+                            <td>${service.employee_remarks || 'N/A'}</td>
+                            <td>${service.vehicle_number}</td>
+                            <td>${service.customer_name}</td>
+                            <td><span class="badge ${getStatusClass(service.service_status)}">${service.service_status}</span></td>
+                        </tr>
+                    `;
+                        $('#servicesList').append(serviceRow);
+                    });
+
+                    // Show the table and close button
+                    $('#servicesContainer').show();
+                    $('#closeTableBtn').show();
+                } else {
+                    // Show message if no services found
+                    $('#servicesList').html('<tr><td colspan="5" class="text-center">No services available for this employee.</td></tr>');
+                    $('#servicesContainer').show();
+                    $('#closeTableBtn').hide(); // No need close button if empty
+                }
+
+                // Show the modal
+                $('#employeeServicesModal').modal('show');
+            },
+            error: function(xhr, status, error) {
+                console.log('Error fetching services:', error);
+                $('#loadingIndicator').html('<p class="text-danger">Error loading services. Please try again.</p>');
+                $('#closeTableBtn').hide();
+            }
+        });
+    });
+
+    // Close table button handler
+    $('#closeTableBtn').on('click', function() {
+        $('#servicesContainer').hide();
+        $(this).hide();
+        $('#loadingIndicator').show();
+    });
+
+    // Helper function for status badge styling
+    function getStatusClass(status) {
+        if (!status) return 'bg-secondary';
+
+        status = status.toLowerCase();
+        switch (status) {
+            case 'completed': return 'bg-success';
+            case 'in progress': return 'bg-primary';
+            case 'pending': return 'bg-warning text-dark';
+            case 'cancelled': return 'bg-danger';
+            default: return 'bg-secondary';
+        }
+    }
+</script>
+
+
 @endsection

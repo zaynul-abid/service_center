@@ -41,6 +41,7 @@ class FounderCompanyCreationController extends Controller
      */
     public function store(Request $request)
     {
+        // Basic validation
         $validatedData = $request->validate([
             'company_name' => 'required|string|max:255',
             'contact_number' => 'required|string|max:20|regex:/^[\d\s\+-]+$/',
@@ -48,12 +49,20 @@ class FounderCompanyCreationController extends Controller
             'registration_number' => 'required|string|max:50|unique:companies',
             'plan_id' => 'required|exists:plans,id',
             'plan_amount' => 'required|numeric|min:0',
-            'discount' => 'nullable|numeric|min:0',
-            'final_price' => 'required|numeric|min:0',
+            'discount' => 'nullable|numeric|min:0|max:'.$request->plan_amount,
+            'final_price' => [
+                'required',
+                'numeric',
+                'min:0',
+                function ($attribute, $value, $fail) use ($request) {
+                    $expected = $request->plan_amount - ($request->discount ?? 0);
+                    if (abs($value - $expected) > 0.01) {
+                        $fail('Final price calculation is incorrect');
+                    }
+                }
+            ],
             'subscription_start_date' => 'required|date|after_or_equal:today',
             'subscription_end_date' => 'required|date|after:subscription_start_date',
-        ], [
-            // ... your existing validation messages ...
         ]);
 
         DB::beginTransaction();
@@ -61,53 +70,42 @@ class FounderCompanyCreationController extends Controller
         try {
             $plan = Plan::findOrFail($validatedData['plan_id']);
 
-            // Create the company first
             $company = Company::create([
                 'company_name' => $validatedData['company_name'],
                 'contact_number' => $validatedData['contact_number'],
                 'address' => $validatedData['address'],
                 'registration_number' => $validatedData['registration_number'],
-                'plan_id' => $validatedData['plan_id'],
+                'plan_id' => $plan->id,
                 'plan_amount' => $validatedData['plan_amount'],
-                'plan_description' => $plan->name, // Store just the plan name, not the whole object
+                'plan_description' => $plan->name,
                 'discount' => $validatedData['discount'] ?? 0,
                 'final_price' => $validatedData['final_price'],
                 'subscription_start_date' => $validatedData['subscription_start_date'],
                 'subscription_end_date' => $validatedData['subscription_end_date'],
                 'company_key' => Company::generateCompanyKey(),
-                'status' => $this->checkSubscriptionStatus($validatedData['subscription_end_date'])
+                'status' => 'active'
             ]);
 
-            // Add entry to SubscriptionHistory table
             SubscriptionHistory::create([
                 'company_id' => $company->id,
-                'company_name' => $company->company_name,
-                'contact_number' => $company->contact_number,
-                'address' => $company->address,
-                'registration_number' => $company->registration_number,
-                'company_key' => $company->company_key,
-
                 'plan_id' => $plan->id,
                 'plan_name' => $plan->name,
-                'plan_amount' => $validatedData['plan_amount'], // Use the validated amount
-                'plan_duration_days' => $plan->days,
-
+                'plan_amount' => $validatedData['plan_amount'],
+                'discount' => $validatedData['discount'] ?? 0,
+                'final_amount' => $validatedData['final_price'],
                 'start_date' => $validatedData['subscription_start_date'],
                 'end_date' => $validatedData['subscription_end_date'],
-                'final_amount' => $validatedData['final_price'],
-                'discount' => $validatedData['discount'] ?? 0,
-                'status' => 'active',
-                'is_renewal' => false,
+                'status' => 'active'
             ]);
 
             DB::commit();
 
             return redirect()->route('companies.index')
-                ->with('success', 'Company created successfully with subscription history!');
+                ->with('success', 'Company created successfully!');
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('Company creation failed: ' . $e->getMessage());
-            return back()->with('error', 'Company creation failed: ' . $e->getMessage());
+            \Log::error('Company creation error: '.$e->getMessage());
+            return back()->withInput()->with('error', 'Error creating company: '.$e->getMessage());
         }
     }
     /**

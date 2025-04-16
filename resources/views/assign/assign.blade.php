@@ -1,6 +1,6 @@
 @extends('backend.layouts.app')
 
-@section('title','service-form')
+@section('title', 'Assign Enquiry to Employees')
 
 @if(auth()->user()->usertype === 'founder')
     @section('navbar')
@@ -17,82 +17,241 @@
 @endif
 
 @section('content')
-
-    <div class="card">
-        <div class="card-header">
-            <h4>Assign Enquiry to Employees</h4>
-        </div>
-
-        @if(session('warning'))
-            <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                {{ session('warning') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <div class="container-fluid py-3">
+        <div class="card shadow-sm rounded-2">
+            <div class="card-header bg-white py-3 px-4">
+                <h5 class="mb-0">Assign Enquiry to Employees</h5>
             </div>
-        @endif
 
-        @if(session('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
+            @if(session('warning'))
+                <div class="alert alert-warning alert-dismissible fade show m-3" role="alert">
+                    {{ session('warning') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
 
-        <div class="card-body">
-            <form action="{{ route('store.assign') }}" method="POST">
-                @csrf
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show m-3" role="alert">
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
 
-                <table id="datatablesSimple" class="table">
-                    <thead>
-                    <tr>
-                        <th data-sortable="false" style="width: 4.67%;"></th>
-                        <th>Serial Number</th>
-                        <th>Date</th>
-                        <th>Time</th>
-                        <th>Customer Name</th>
-                        <th>Contact Number</th>
-                        <th>Status</th>
-                        <th>Vehicle Number</th>
-                        <th>Employee</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    @foreach($services as $service)
-                        <tr>
-                            <td><input type="checkbox" name="service_ids[]" value="{{ $service->id }}"></td>
-                            <td>{{ $service->booking_id }}</td>
-                            <td>{{ $service->booking_date }}</td>
-                            <td>{{ $service->booking_time }}</td>
-                            <td>{{ $service->customer_name }}</td>
-                            <td>{{ $service->contact_number_1 }}</td>
-                            <td>{{ $service->status }}</td>
-                            <td>{{ $service->vehicle_number }}</td>
-                            <td><strong>{{ strtoupper($service->employee->name ?? 'NOT ASSIGNED') }}</strong></td>
-                        </tr>
-                    @endforeach
-                    </tbody>
-                </table>
+            <div class="card-body p-3">
+                <!-- Filter Section -->
+                <div class="row mb-3 g-2">
+                    <div class="col-md-3">
+                        <select id="status-filter" class="form-select form-select-sm">
+                            <option value="">All Statuses</option>
+                            <option value="pending">Pending</option>
+                            <option value="Completed">Completed</option>
+                            <option value="in_progress">In Progress</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                    <div class="row g-1 align-items-center" style="max-width: 320px;">
+                        <div class="col">
+                            <input type="date" id="from-date-filter" class="form-control form-control-sm" placeholder="From">
+                        </div>
+                        <div class="col-auto">
+                            <span class="form-text">to</span>
+                        </div>
+                        <div class="col">
+                            <input type="date" id="to-date-filter" class="form-control form-control-sm" placeholder="To">
+                        </div>
+                    </div>
 
-                <!-- Move Employee Selection Here -->
-                <div class="mb-3 mt-3">
-                    <label for="employee_id" class="form-label">Select Employee:</label>
-                    <select name="employee_id" class="form-select" required>
-                        <option value="" disabled selected>Select Employee</option>
-                        @foreach($employees as $employee)
-                            <option value="{{ $employee->id }}">{{ $employee->name }}</option>
-                        @endforeach
-                    </select>
+                    <div class="col-md-3">
+                        <input type="text" id="search-input" class="form-control form-control-sm" placeholder="Search...">
+                    </div>
+                    <div class="col-md-3">
+                        <button id="reset-filters" class="btn btn-sm btn-outline-secondary">Reset Filters</button>
+                    </div>
                 </div>
 
-                <button type="submit" class="btn btn-success mt-3">Assign Selected Enquiries</button>
-            </form>
+                <form action="{{ route('store.assign') }}" method="POST" id="assign-form">
+                    @csrf
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover align-middle">
+                            <thead class="bg-light">
+                            <tr>
+                                <th width="40px" class="ps-2 pe-1 py-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input m-0" type="checkbox" id="select-all">
+                                    </div>
+                                </th>
+                                <th class="px-2 py-2">ID</th>
+                                <th class="px-2 py-2">Date/Time</th>
+                                <th class="px-2 py-2">Customer</th>
+                                <th class="px-2 py-2">Contact</th>
+                                <th class="px-2 py-2">Status</th>
+                                <th class="px-2 py-2">Vehicle</th>
+                                <th class="px-2 py-2">Employee</th>
+                            </tr>
+                            </thead>
+                            <tbody id="services-table-body">
+                            @include('assign.table_rows', ['services' => $services])
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="d-flex justify-content-center mt-3" id="pagination-container">
+                        @if($services instanceof \Illuminate\Pagination\AbstractPaginator)
+                            {{ $services->links('pagination::bootstrap-5') }}
+                        @endif
+                    </div>
+
+                    <div class="mt-3 pt-3 border-top">
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <select name="employee_id" class="form-select form-select-sm" required>
+                                    <option value="" disabled selected>Select Employee</option>
+                                    @foreach($employees as $employee)
+                                        <option value="{{ $employee->id }}">{{ $employee->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-6 text-md-end">
+                                <button type="submit" class="btn btn-sm btn-primary px-3">
+                                    Assign Selected
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
+
     <script>
-        document.getElementById('select-all').addEventListener('click', function() {
-            let checkboxes = document.querySelectorAll('input[name="service_ids[]"]');
-            checkboxes.forEach(checkbox => checkbox.checked = this.checked);
+
+
+
+        $(document).ready(function() {
+            // Select all checkbox
+            $(document).on('change', '#select-all', function() {
+                $('tbody input[type="checkbox"]').prop('checked', $(this).prop('checked'));
+            });
+
+            // Function to apply filters
+            function applyFilters() {
+                const status = $('#status-filter').val();
+                const fromDate = $('#from-date-filter').val();
+                const toDate = $('#to-date-filter').val();
+                const search = $('#search-input').val();
+
+                // Log the data being sent
+                console.log('Sending filter data:', {
+                    status: status,
+                    from_date: fromDate,
+                    to_date: toDate,
+                    search: search
+                });
+
+                showLoading();
+
+                $.ajax({
+                    url: "{{ route('show.assign') }}", // Replace with your actual route
+                    type: "GET",
+                    data: {
+                        status: status,
+                        from_date: fromDate,
+                        to_date: toDate,
+                        search: search,
+                        ajax: true
+                    },
+                    beforeSend: function() {
+                        // This is optional, just for logging
+                        console.log('Before sending request');
+                    },
+                    success: function(response) {
+                        // Log the response for debugging
+                        console.log('Response received:', response);
+
+                        $('#services-table-body').html(response.html);
+                        $('#pagination-container').html(response.pagination);
+                    },
+                    error: function(xhr) {
+                        console.error('Error:', xhr.responseText);
+                        alert('An error occurred while filtering data.');
+                    },
+                    complete: function() {
+                        hideLoading();
+                    }
+                });
+            }
+
+            // Status filter
+            $('#status-filter').on('change', function() {
+                applyFilters();
+            });
+
+            // Date filter
+            $('#from-date-filter, #to-date-filter').on('change', function() {
+                applyFilters();
+            });
+
+            // Search input with debounce
+            let searchTimer;
+            $('#search-input').on('keyup', function() {
+                clearTimeout(searchTimer);
+                searchTimer = setTimeout(() => {
+                    applyFilters();
+                }, 500); // 500ms debounce time
+            });
+
+            // Reset all filters
+            $('#reset-filters').on('click', function() {
+                $('#status-filter').val('');
+                $('#from-date-filter').val('');
+                $('#to-date-filter').val('');
+                $('#search-input').val('');
+                applyFilters();
+            });
+
+            // Handle pagination clicks
+            $(document).on('click', '.pagination a', function(e) {
+                e.preventDefault();
+                const url = $(this).attr('href');
+                showLoading();
+
+                $.ajax({
+                    url: url,
+                    type: "GET",
+                    data: {
+                        ajax: true,
+                        status: $('#status-filter').val(),
+                        from_date: $('#from-date-filter').val(),
+                        to_date: $('#to-date-filter').val(),
+                        search: $('#search-input').val()
+                    },
+                    success: function(response) {
+                        $('#services-table-body').html(response.html);
+                        $('#pagination-container').html(response.pagination);
+                    },
+                    error: function(xhr) {
+                        console.error('Error:', xhr.responseText);
+                        alert('An error occurred while loading the page.');
+                    },
+                    complete: function() {
+                        hideLoading();
+                    }
+                });
+            });
+
+            // Loading indicator functions
+            function showLoading() {
+                $('#services-table-body').html('<tr><td colspan="8" class="text-center py-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>');
+            }
+
+            function hideLoading() {
+                // Handled by AJAX success/complete
+            }
         });
+
     </script>
 
 @endsection
+

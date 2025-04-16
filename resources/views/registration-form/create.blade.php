@@ -23,8 +23,11 @@
 
     <!-- Display Current Date and Time -->
     <div class="current-time">
-        <strong>Date:</strong> <span id="currentDateTime"></span>
+        <strong>Date:</strong><span>{{ \Carbon\Carbon::now('Asia/Kolkata')->format('d/m/Y H:i') }}</span>
+
     </div>
+
+
 
     <!-- Header Image -->
     <div class="header-image">

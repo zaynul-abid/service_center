@@ -13,18 +13,54 @@ use Illuminate\Support\Facades\Log;
 
 class EmployeeAssignController extends Controller
 {
-    public function showAssignPage()
+    public function showAssignPage(Request $request)
     {
         try {
-            // Fetch only services that are NOT completed
-            $services = Service::where('status', '!=', 'Completed')->get();
+            $query = Service::query();
 
+
+            // Apply filters if they exist in the request
+            if ($request->ajax()) {
+                if ($request->has('status') && $request->status) {
+                    $query->where('status', $request->status);
+                }
+
+                if ($request->has('from_date') && $request->from_date) {
+                    $query->whereDate('booking_date', '>=', $request->from_date);
+                }
+
+                if ($request->has('to_date') && $request->to_date) {
+                    $query->whereDate('booking_date', '<=', $request->to_date);
+                }
+
+                if ($request->has('search') && $request->search) {
+                    $search = $request->search;
+                    $query->where(function($q) use ($search) {
+                        $q->where('customer_name', 'like', "%$search%")
+                            ->orWhere('contact_number_1', 'like', "%$search%")
+                            ->orWhere('vehicle_number', 'like', "%$search%")
+                            ->orWhere('booking_id', 'like', "%$search%")
+                            ->orWhereHas('employee', function ($empQuery) use ($search) {
+                                $empQuery->where('name', 'like', "%$search%");
+                            });
+                    });
+                }
+                $services = $query->paginate(10);
+                return response()->json([
+                    'html' => view('assign.table_rows', compact('services'))->render(),
+                    'pagination' => (string)$services->links('pagination::bootstrap-5')
+                ]);
+            }
+
+            $services = $query->paginate(10);
             $employees = Employee::all();
 
             return view('assign.assign', compact('services', 'employees'));
         } catch (Exception $e) {
             Log::error('Error loading assign page: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Failed to load assign page.');
+            return $request->ajax()
+                ? response()->json(['error' => 'Failed to load data'], 500)
+                : redirect()->back()->with('error', 'Failed to load assign page.');
         }
     }
 

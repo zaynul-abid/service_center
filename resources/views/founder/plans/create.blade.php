@@ -34,7 +34,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label for="days" class="form-label">Duration (Days)</label>
-                                    <input type="number" id="days" name="days" class="form-control" placeholder="30" min="1" required>
+                                    <input type="number" id="days" name="days" class="form-control" placeholder="" min="" required>
                                 </div>
                             </div>
 
@@ -58,3 +58,34 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get the form element
+            const form = document.getElementById('form');
+
+            if (form) {
+                // Prevent form submission on Enter key (except for textareas)
+                form.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+                        e.preventDefault();
+                    }
+                });
+
+                // Get the reset button
+                const resetButton = form.querySelector('button[type="reset"]');
+
+                if (resetButton) {
+                    // Make reset button refresh the page
+                    resetButton.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        window.location.reload();
+                    });
+                }
+            }
+        });
+    </script>
+@endpush

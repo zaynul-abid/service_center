@@ -139,7 +139,7 @@
                                    id="subscription_start_date"
                                    name="subscription_start_date"
                                    class="form-control @error('subscription_start_date') is-invalid @enderror"
-                                   value="{{ old('subscription_start_date', $company->subscription_start_date) }}"
+                                   value="{{ old('subscription_start_date', $company->subscription_start_date->format('Y-m-d')) }}"
                                    onchange="updateEndDate()"
                                    required>
                             @error('subscription_start_date')
@@ -153,7 +153,7 @@
                                    id="subscription_end_date"
                                    name="subscription_end_date"
                                    class="form-control @error('subscription_end_date') is-invalid @enderror"
-                                   value="{{ old('subscription_end_date', $company->subscription_end_date) }}"
+                                   value="{{ old('subscription_end_date', $company->subscription_end_date->format('Y-m-d')) }}"
                                    readonly>
                             @error('subscription_end_date')
                             <div class="invalid-feedback">{{ $message }}</div>
@@ -172,38 +172,75 @@
 @endsection
 
 @push('scripts')
-    <script src="{{asset('founder_assets/create_company/js/script.js')}}"></script>
+
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            updatePlanDetails();
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('companyForm'); // or use a specific ID if needed
+
+            form.addEventListener('keydown', function (event) {
+                if (event.key === 'Enter' && event.target.nodeName !== 'TEXTAREA') {
+                    event.preventDefault();
+                }
+            });
         });
 
-        function updatePlanDetails() {
-            let planSelect = document.getElementById('plan_id');
-            let selectedPlan = planSelect.options[planSelect.selectedIndex];
+        document.addEventListener("DOMContentLoaded", function() {
+            // Initialize all values when page loads
+            initializeForm();
 
-            if (selectedPlan && selectedPlan.dataset.amount) {
+            // Set up event listeners
+            document.getElementById('plan_id').addEventListener('change', updatePlanDetails);
+            document.getElementById('subscription_start_date').addEventListener('change', updateEndDate);
+            document.getElementById('discount').addEventListener('input', calculateFinalPrice);
+        });
+
+        function initializeForm() {
+            // Get the current selected plan
+            const planSelect = document.getElementById('plan_id');
+            const selectedPlan = planSelect.options[planSelect.selectedIndex];
+
+            // Set plan amount from selected plan
+            if (selectedPlan && selectedPlan.value) {
                 document.getElementById('plan_amount').value = selectedPlan.dataset.amount;
+            }
+
+            // Calculate final price with existing discount
+            calculateFinalPrice();
+
+            // Calculate end date if start date exists
+            const startDate = document.getElementById('subscription_start_date').value;
+            if (startDate) {
+                updateEndDate();
+            }
+        }
+
+        function updatePlanDetails() {
+            const planSelect = document.getElementById('plan_id');
+            const selectedPlan = planSelect.options[planSelect.selectedIndex];
+
+            if (selectedPlan && selectedPlan.value) {
+                document.getElementById('plan_amount').value = selectedPlan.dataset.amount;
+                calculateFinalPrice();
                 updateEndDate();
             }
         }
 
         function updateEndDate() {
-            let startDate = document.getElementById('subscription_start_date').value;
-            let planSelect = document.getElementById('plan_id');
-            let days = planSelect.options[planSelect.selectedIndex].dataset.days;
+            const startDateInput = document.getElementById('subscription_start_date');
+            const planSelect = document.getElementById('plan_id');
+            const selectedPlan = planSelect.options[planSelect.selectedIndex];
 
-            if (startDate && days) {
-                let endDate = new Date(startDate);
-                endDate.setDate(endDate.getDate() + parseInt(days));
-
+            if (startDateInput.value && selectedPlan.dataset.days) {
+                const endDate = new Date(startDateInput.value);
+                endDate.setDate(endDate.getDate() + parseInt(selectedPlan.dataset.days));
                 document.getElementById('subscription_end_date').value = endDate.toISOString().split('T')[0];
             }
         }
 
         function calculateFinalPrice() {
-            let planAmount = parseFloat(document.getElementById('plan_amount').value) || 0;
-            let discount = parseFloat(document.getElementById('discount').value) || 0;
+            const planAmount = parseFloat(document.getElementById('plan_amount').value) || 0;
+            const discount = parseFloat(document.getElementById('discount').value) || 0;
             document.getElementById('final_price').value = (planAmount - discount).toFixed(2);
         }
     </script>

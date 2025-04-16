@@ -80,28 +80,51 @@ class FounderSuperadminController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => ['required', 'email', Rule::unique('users')->ignore($superadmin->id)],
-            'company_id' => 'required|exists:companies,id'
+            'email' => [
+                'required',
+                'email',
+                Rule::unique('users')->ignore($superadmin->id)
+            ],
+            'company_id' => 'required|exists:companies,id',
+            'password' => 'nullable|min:8|confirmed',
+            'password_confirmation' => 'nullable'
         ]);
 
-        DB::beginTransaction(); // Start Transaction
+        DB::beginTransaction();
 
         try {
-            $superadmin->update([
+            $updateData = [
                 'name' => $request->name,
                 'email' => $request->email,
                 'company_id' => $request->company_id
+            ];
+
+            // Only update password if it was provided
+            if (!empty($request->password)) {
+                $updateData['password'] = Hash::make($request->password);
+            }
+
+            $superadmin->update($updateData);
+
+            DB::commit();
+
+            return redirect()
+                ->route('superadmins.index')
+                ->with('success', 'Superadmin updated successfully!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            Log::error('Superadmin update failed: ' . $e->getMessage(), [
+                'superadmin_id' => $superadmin->id,
+                'request' => $request->except(['password', 'password_confirmation'])
             ]);
 
-            DB::commit(); // Commit Transaction
-
-            return redirect()->route('superadmins.index')->with('success', 'Superadmin updated successfully!');
-        } catch (\Exception $e) {
-            DB::rollBack(); // Rollback Transaction on Error
-            return back()->withErrors(['error' => 'Something went wrong: ' . $e->getMessage()]);
+            return back()
+                ->withInput()
+                ->withErrors(['error' => 'Failed to update superadmin. Please try again.']);
         }
     }
-
     public function destroy(User $superadmin)
     {
         DB::beginTransaction(); // Start Transaction

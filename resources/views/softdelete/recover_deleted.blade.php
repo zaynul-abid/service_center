@@ -23,7 +23,6 @@
                 <h1 class="h3 mb-1"><i class="fas fa-recycle text-primary me-2"></i>Recycle Bin</h1>
                 <p class="text-muted mb-0">Manage deleted items and restore when needed</p>
             </div>
-
         </div>
 
         <!-- Flash Messages -->
@@ -79,6 +78,22 @@
                             <span class="badge bg-primary rounded-pill">{{ $deletedServices->count() }}</span>
                         </button>
                     </li>
+                    @if(auth()->user()->usertype === 'founder')
+                    <li class="nav-item flex-shrink-0" role="presentation">
+                        <button class="nav-link d-flex align-items-center gap-2" id="companies-tab" data-bs-toggle="pill" data-bs-target="#companies" type="button" role="tab">
+                            <i class="fas fa-building"></i>
+                            <span>Companies</span>
+                            <span class="badge bg-primary rounded-pill">{{ $deletedCompanies->count() }}</span>
+                        </button>
+                    </li>
+                    <li class="nav-item flex-shrink-0" role="presentation">
+                        <button class="nav-link d-flex align-items-center gap-2" id="plans-tab" data-bs-toggle="pill" data-bs-target="#plans" type="button" role="tab">
+                            <i class="fas fa-clipboard-list"></i>
+                            <span>Plans</span>
+                            <span class="badge bg-primary rounded-pill">{{ $deletedPlans->count() }}</span>
+                        </button>
+                    </li>
+                    @endif
                 </ul>
             </div>
         </div>
@@ -433,6 +448,172 @@
                     @endif
                 </div>
             </div>
+
+            <!-- Companies Tab -->
+            @if(auth()->user()->usertype === 'founder')
+            <div class="tab-pane fade" id="companies" role="tabpanel">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white py-3">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                            <h5 class="mb-2 mb-md-0">
+                                <i class="fas fa-building text-primary me-2"></i>Deleted Companies
+                            </h5>
+                            <div class="text-muted small">
+                                Showing {{ $deletedCompanies->count() }} item{{ $deletedCompanies->count() !== 1 ? 's' : '' }}
+                            </div>
+                        </div>
+                    </div>
+
+                    @if($deletedCompanies->isEmpty())
+                        <div class="card-body">
+                            <div class="alert alert-light border text-center py-4">
+                                <i class="fas fa-building-circle-xmark fa-2x text-muted mb-3"></i>
+                                <h5 class="text-muted">No deleted companies found</h5>
+                                <p class="mb-0">Deleted companies will appear here</p>
+                            </div>
+                        </div>
+                    @else
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="bg-light">
+                                <tr>
+                                    <th width="80">ID</th>
+                                    <th>Company Name</th>
+                                    <th>Plan</th>
+                                    <th width="160">Deleted</th>
+                                    <th width="120" class="text-end">Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                @foreach($deletedCompanies as $company)
+                                    <tr>
+                                        <td class="text-muted align-middle">#{{ $company->id }}</td>
+                                        <td class="align-middle fw-medium">{{ $company->company_name }}</td>
+                                        <td class="align-middle">{{ $company->plan->name }}</td>
+                                        <td class="align-middle">
+                                            <span class="badge bg-light text-dark">
+                                                <i class="far fa-clock me-1"></i>
+                                                {{ $company->deleted_at->diffForHumans() }}
+                                            </span>
+                                        </td>
+                                        <td class="align-middle text-end">
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <a href="{{ route('softdelete.restore.company', $company->id) }}"
+                                                   class="btn btn-outline-success rounded-start-2"
+                                                   data-bs-toggle="tooltip"
+                                                   title="Restore">
+                                                    <i class="fas fa-trash-restore"></i>
+                                                </a>
+                                                <form method="POST" action="{{ route('softdelete.forceDelete.company', $company->id) }}" class="d-inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit"
+                                                            class="btn btn-outline-danger rounded-end-2"
+                                                            data-bs-toggle="tooltip"
+                                                            title="Delete Permanently"
+                                                            onclick="return confirm('Permanently delete {{ $company->name }}?')">
+                                                        <i class="fas fa-trash-alt"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                        @if($deletedCompanies->hasPages())
+                            <div class="card-footer bg-white">
+                                {{ $deletedCompanies->links() }}
+                            </div>
+                        @endif
+                    @endif
+                </div>
+            </div>
+
+            <!-- Plans Tab -->
+            <div class="tab-pane fade" id="plans" role="tabpanel">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white py-3">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                            <h5 class="mb-2 mb-md-0">
+                                <i class="fas fa-clipboard-list text-primary me-2"></i>Deleted Plans
+                            </h5>
+                            <div class="text-muted small">
+                                Showing {{ $deletedPlans->count() }} item{{ $deletedPlans->count() !== 1 ? 's' : '' }}
+                            </div>
+                        </div>
+                    </div>
+
+                    @if($deletedPlans->isEmpty())
+                        <div class="card-body">
+                            <div class="alert alert-light border text-center py-4">
+                                <i class="fas fa-clipboard fa-2x text-muted mb-3"></i>
+                                <h5 class="text-muted">No deleted plans found</h5>
+                                <p class="mb-0">Deleted plans will appear here</p>
+                            </div>
+                        </div>
+                    @else
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="bg-light">
+                                <tr>
+                                    <th width="80">ID</th>
+                                    <th>Plan Name</th>
+                                    <th>Price</th>
+                                    <th>Duration</th>
+                                    <th width="160">Deleted</th>
+                                    <th width="120" class="text-end">Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                @foreach($deletedPlans as $plan)
+                                    <tr>
+                                        <td class="text-muted align-middle">#{{ $plan->id }}</td>
+                                        <td class="align-middle fw-medium">{{ $plan->name }}</td>
+                                        <td class="align-middle">{{ config('settings.currency_symbol') }}{{ $plan->amount }}</td>
+                                        <td class="align-middle">{{ $plan->days }} days</td>
+                                        <td class="align-middle">
+                                            <span class="badge bg-light text-dark">
+                                                <i class="far fa-clock me-1"></i>
+                                                {{ $plan->deleted_at->diffForHumans() }}
+                                            </span>
+                                        </td>
+                                        <td class="align-middle text-end">
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <a href="{{ route('softdelete.restore.plan', $plan->id) }}"
+                                                   class="btn btn-outline-success rounded-start-2"
+                                                   data-bs-toggle="tooltip"
+                                                   title="Restore">
+                                                    <i class="fas fa-trash-restore"></i>
+                                                </a>
+                                                <form method="POST" action="{{ route('softdelete.forceDelete.plan', $plan->id) }}" class="d-inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit"
+                                                            class="btn btn-outline-danger rounded-end-2"
+                                                            data-bs-toggle="tooltip"
+                                                            title="Delete Permanently"
+                                                            onclick="return confirm('Permanently delete {{ $plan->name }} plan?')">
+                                                        <i class="fas fa-trash-alt"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                        @if($deletedPlans->hasPages())
+                            <div class="card-footer bg-white">
+                                {{ $deletedPlans->links() }}
+                            </div>
+                        @endif
+                    @endif
+                </div>
+            </div>
+            @endif
         </div>
     </div>
 
@@ -554,5 +735,4 @@
             window.addEventListener('resize', makeTablesResponsive);
         });
     </script>
-
 @endsection

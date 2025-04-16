@@ -64,6 +64,12 @@ Route::middleware(['auth', 'usertype:superadmin'])->group(function () {
         Route::resource('departments', DepartmentController::class);
 
         Route::resource('employees', EmployeeController::class);
+
+        Route::get('/employee/services/{id}', [EmployeeController::class, 'getServices'])->name('employee.services');
+
+
+
+
     });
 
 
@@ -75,18 +81,27 @@ Route::middleware(['auth', 'usertype:superadmin'])->group(function () {
         // Restore routes (POST)
         Route::get('/restore/user/{id}', [SoftDeleteController::class, 'restoreUser'])->name('restore.user');
         Route::get('/restore/employee/{id}', [SoftDeleteController::class, 'restoreEmployee'])->name('restore.employee');
-        Route::get('/restore/customer/{id}', [SoftDeleteController::class, 'restoreCustomer'])->name('restore.customer');
         Route::get('/restore/department/{id}', [SoftDeleteController::class, 'restoreDepartment'])->name('restore.department');
         Route::get('/restore/service/{id}', [SoftDeleteController::class, 'restoreService'])->name('restore.service');
+        Route::get('/restore/plan/{id}', [SoftDeleteController::class, 'restorePlan'])->name('restore.plan');
+        Route::get('/restore/company/{id}', [SoftDeleteController::class, 'restoreCompany'])->name('restore.company');
+
+        Route::get('/restore/customer/{id}', [SoftDeleteController::class, 'restoreCustomer'])->name('restore.customer');
         Route::get('/restore/vehicle/{id}', [SoftDeleteController::class, 'restoreVehicle'])->name('restore.vehicle');
+
 
         // Force delete routes (DELETE)
         Route::delete('/force-delete/user/{id}', [SoftDeleteController::class, 'forceDeleteUser'])->name('forceDelete.user');
         Route::delete('/force-delete/employee/{id}', [SoftDeleteController::class, 'forceDeleteEmployee'])->name('forceDelete.employee');
-        Route::delete('/force-delete/customer/{id}', [SoftDeleteController::class, 'forceDeleteCustomer'])->name('forceDelete.customer');
         Route::delete('/force-delete/department/{id}', [SoftDeleteController::class, 'forceDeleteDepartment'])->name('forceDelete.department');
-        Route::delete('/service-delete/{id}', [SoftDeleteController::class, 'forceDeleteService'])->name('forceDelete.service');
+        Route::delete('/force-delete/service/{id}', [SoftDeleteController::class, 'forceDeleteService'])->name('forceDelete.service');
+        Route::delete('/force-delete/plan/{id}', [SoftDeleteController::class, 'forceDeletePlan'])->name('forceDelete.plan');
+        Route::delete('/force-delete/company/{id}', [SoftDeleteController::class, 'forceDeleteCompany'])->name('forceDelete.company');
+
+
         Route::delete('/force-delete/vehicle/{id}', [SoftDeleteController::class, 'forceDeleteVehicle'])->name('forceDelete.vehicle');
+        Route::delete('/force-delete/customer/{id}', [SoftDeleteController::class, 'forceDeleteCustomer'])->name('forceDelete.customer');
+
     });
 });
 

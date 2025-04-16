@@ -19,41 +19,33 @@
         </div>
     @endif
 
-    <!-- Display General Validation Errors -->
-{{--    @if($errors->any())s--}}
-{{--        <div class="alert alert-danger">--}}
-{{--            <ul>--}}
-{{--                @foreach($errors->all() as $error)--}}
-{{--                    <li>{{ $error }}</li>--}}
-{{--                @endforeach--}}
-{{--            </ul>--}}
-{{--        </div>--}}
-{{--    @endif--}}
+
 
     <!-- Form -->
     <form id="serviceForm" action="{{ route('services.update', $service->id) }}" method="POST" enctype="multipart/form-data" autocomplete="off">
         @csrf
         @method('PUT')
+        <input type="hidden" name="company_id" value="{{$service->company_id}}">
 
         <!-- Booking Date and Time -->
 
-        <input type="hidden" name="company_id" value="{{$service->company_id}}">
         <div class="row mb-3">
             <div class="col-md-6">
-                <label for="booking_date" class="form-label required">Booking Date</label>
-                <input type="date" class="form-control @error('booking_date') is-invalid @enderror" id="booking_date" name="booking_date" value="{{ old('booking_date', $service->booking_date) }}" required>
+                <label for="bookingDate" class="form-label"> Date</label>
+                <input type="date" class="form-control @error('booking_date') is-invalid @enderror" id="bookingDate" name="booking_date"  value="{{ old('booking_date', \Carbon\Carbon::parse($service->booking_date)->format('Y-m-d')) }}">
                 @error('booking_date')
-                    <div class="text-danger mt-1" style="font-size: 0.9rem;">{{ $message }}</div>
+                <div class="text-danger mt-1" style="font-size: 0.9rem;">{{ $message }}</div>
                 @enderror
             </div>
             <div class="col-md-6">
-                <label for="booking_time" class="form-label required">Booking Time</label>
-                <input type="time" class="form-control @error('booking_time') is-invalid @enderror" id="booking_time" name="booking_time" value="{{ old('booking_time', $service->booking_time) }}" required>
+                <label for="bookingTime" class="form-label">Time</label>
+                <input type="time" class="form-control @error('booking_time') is-invalid @enderror" id="bookingTime" name="booking_time" value="{{ old('booking_time', $service->booking_time) }}">
                 @error('booking_time')
-                    <div class="text-danger mt-1" style="font-size: 0.9rem;">{{ $message }}</div>
+                <div class="text-danger mt-1" style="font-size: 0.9rem;">{{ $message }}</div>
                 @enderror
             </div>
         </div>
+
 
         <div class="row mb-3">
             <div class="col-md-6">
@@ -285,5 +277,64 @@
         </div>
     </form>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('serviceForm');
+        const focusableElements = form.querySelectorAll('input, select, textarea, button');
+        const focusableArray = Array.from(focusableElements).filter(el =>
+            !el.disabled &&
+            el.type !== 'hidden' &&
+            el.tabIndex !== -1
+        );
+
+        // Function to get current focused element index
+        function getCurrentIndex() {
+            return focusableArray.indexOf(document.activeElement);
+        }
+
+        // Function to focus next element
+        function focusNext() {
+            const currentIndex = getCurrentIndex();
+            if (currentIndex < focusableArray.length - 1) {
+                focusableArray[currentIndex + 1].focus();
+            }
+        }
+
+        // Function to focus previous element
+        function focusPrevious() {
+            const currentIndex = getCurrentIndex();
+            if (currentIndex > 0) {
+                focusableArray[currentIndex - 1].focus();
+            }
+        }
+
+        // Handle keyboard navigation
+        form.addEventListener('keydown', function(event) {
+            const activeElement = document.activeElement;
+
+            // Enter key behavior
+            if (event.key === 'Enter' && !event.shiftKey) {
+                // Don't submit if pressing Enter in a non-submit element
+                if (activeElement.tagName === 'TEXTAREA' ||
+                    (activeElement.tagName === 'INPUT' && activeElement.type !== 'submit')) {
+                    event.preventDefault();
+                    focusNext();
+                    return false;
+                }
+            }
+
+            // Shift+Enter or Esc for reverse navigation
+            if ((event.key === 'Enter' && event.shiftKey) || event.key === 'Escape') {
+                event.preventDefault();
+                focusPrevious();
+                return false;
+            }
+        });
+
+        // Your existing autocomplete and other JavaScript code can go here
+        // ...
+    });
+</script>
 
 @endsection

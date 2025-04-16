@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Softdelete;
 
 use App\Http\Controllers\Controller;
+use App\Models\Company;
 use App\Models\Customer;
 use App\Models\Department;
 use App\Models\Employee;
+use App\Models\Plan;
 use App\Models\Service;
 use App\Models\User;
 use App\Models\Vehicle;
@@ -23,6 +25,8 @@ class SoftDeleteController extends Controller
         $deletedDepartments = Department::onlyTrashed()->paginate(10, ['*'], 'departments_page');
         $deletedServices = Service::onlyTrashed()->paginate(10, ['*'], 'services_page');
         $deletedVehicles = Vehicle::onlyTrashed()->paginate(10, ['*'], 'vehicles_page');
+        $deletedPlans = Plan::onlyTrashed()->paginate(10, ['*'], 'plans_page');
+        $deletedCompanies = Company::onlyTrashed()->paginate(10, ['*'], 'companies_page');
 
         return view('softdelete.recover_deleted', compact(
             'deletedUsers',
@@ -31,6 +35,8 @@ class SoftDeleteController extends Controller
             'deletedDepartments',
             'deletedServices',
             'deletedVehicles',
+            'deletedPlans',
+            'deletedCompanies',
             'activeTab'
         ));
     }
@@ -107,23 +113,7 @@ class SoftDeleteController extends Controller
             ->with('success', 'Employee and associated user permanently deleted');
     }
 
-    public function restoreCustomer($id)
-    {
-        $customer = Customer::onlyTrashed()->findOrFail($id);
-        $customer->restore();
 
-        return redirect()->route('softdelete.index', ['tab' => 'customers'])
-            ->with('success', 'Customer restored successfully');
-    }
-
-    public function forceDeleteCustomer($id)
-    {
-        $customer = Customer::onlyTrashed()->findOrFail($id);
-        $customer->forceDelete();
-
-        return redirect()->route('softdelete.index', ['tab' => 'customers'])
-            ->with('success', 'Customer permanently deleted');
-    }
 
     public function restoreDepartment($id)
     {
@@ -161,6 +151,52 @@ class SoftDeleteController extends Controller
             ->with('success', 'Service permanently deleted');
     }
 
+
+
+    public function restorePlan($id)
+    {
+        $plan = Plan::onlyTrashed()->findOrFail($id);
+        $plan->restore();
+
+        return redirect()->route('softdelete.index', ['tab' => 'plans'])
+            ->with('success', 'Plan restored successfully');
+    }
+
+    public function forceDeletePlan($id)
+    {
+        $plan = Plan::onlyTrashed()->findOrFail($id);
+        $plan->forceDelete();
+
+        return redirect()->route('softdelete.index', ['tab' => 'plans'])
+            ->with('success', 'Plan permanently deleted');
+    }
+
+
+    public function restoreCompany($id)
+    {
+        $company = Company::onlyTrashed()->findOrFail($id);
+        $company->restore();
+
+        return redirect()->route('softdelete.index', ['tab' => 'companies'])
+            ->with('success', 'Company restored successfully');
+    }
+
+    public function forceDeleteCompany($id)
+    {
+        $company = Company::onlyTrashed()->findOrFail($id);
+        $company->forceDelete();
+
+        return redirect()->route('softdelete.index', ['tab' => 'companies'])
+            ->with('success', 'Company permanently deleted');
+    }
+
+
+
+
+
+
+
+
     public function restoreVehicle($id)
     {
         $vehicle = Vehicle::onlyTrashed()->findOrFail($id);
@@ -178,4 +214,24 @@ class SoftDeleteController extends Controller
         return redirect()->route('softdelete.index', ['tab' => 'vehicles'])
             ->with('success', 'Vehicle permanently deleted');
     }
+
+    public function restoreCustomer($id)
+    {
+        $customer = Customer::onlyTrashed()->findOrFail($id);
+        $customer->restore();
+
+        return redirect()->route('softdelete.index', ['tab' => 'customers'])
+            ->with('success', 'Customer restored successfully');
+    }
+
+    public function forceDeleteCustomer($id)
+    {
+        $customer = Customer::onlyTrashed()->findOrFail($id);
+        $customer->forceDelete();
+
+        return redirect()->route('softdelete.index', ['tab' => 'customers'])
+            ->with('success', 'Customer permanently deleted');
+    }
+
+
 }

@@ -17,21 +17,19 @@
 
 
 
-                <a class="nav-link collapsed {{ request()->routeIs('') || request()->routeIs('') ? 'active' : '' }}" href="#" data-bs-toggle="collapse" data-bs-target="#companyMenu" aria-expanded="false">
+                <a class="nav-link collapsed {{ request()->routeIs('companies.*') || request()->routeIs('plans.*') || request()->routeIs('plan_history.*') ? 'active' : '' }}" href="#" data-bs-toggle="collapse" data-bs-target="#companyMenu" aria-expanded="false">
                     <div class="sb-nav-link-icon"><i class="fas fa-file-alt"></i></div>
-                   Company
+                    Company
                     <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
                 </a>
 
-
-                <div class="collapse {{ request()->routeIs('companies.index') || request()->routeIs('companies.index') ? 'show' : '' }}" id="companyMenu">
+                <div class="collapse {{ request()->routeIs('companies.*') || request()->routeIs('plans.*') || request()->routeIs('plan_history.*') ? 'show' : '' }}" id="companyMenu">
                     <nav class="sb-sidenav-menu-nested nav">
                         <a class="nav-link {{ request()->routeIs('companies.index') ? 'active' : '' }}" href="{{ route('companies.index') }}">Company Dashboard</a>
-                        <a class="nav-link {{ request()->routeIs('plans.index') ? 'active' : '' }}" href="{{route('plans.index')}}">Plans</a>
-                        <a class="nav-link {{ request()->routeIs('plan_history.index') ? 'active' : '' }}" href="{{route('plan_history.index')}}">Plan History</a>
+                        <a class="nav-link {{ request()->routeIs('plans.index') ? 'active' : '' }}" href="{{ route('plans.index') }}">Plans</a>
+                        <a class="nav-link {{ request()->routeIs('plan_history.index') ? 'active' : '' }}" href="{{ route('plan_history.index') }}">Plan History</a>
                     </nav>
                 </div>
-
 
 
 

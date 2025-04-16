@@ -13,8 +13,16 @@ class PlanSeeder extends Seeder
      */
     public function run(): void
     {
-        Plan::create(['name' => 'Basic', 'amount' => 100, 'days' => 30]);
-        Plan::create(['name' => 'Premium', 'amount' => 300, 'days' => 90]);
-        Plan::create(['name' => 'Enterprise', 'amount' => 500, 'days' => 180]);
+        $names = ['Basic', 'Standard', 'Premium', 'Pro', 'Enterprise', 'Ultimate'];
+        $suffixes = ['', ' Plus', ' Pro', ' Max', ' 2024'];
+
+        for ($i = 0; $i < 30; $i++) {
+            Plan::create([
+                'name' => $names[array_rand($names)] . $suffixes[array_rand($suffixes)],
+                'amount' => rand(5, 200) * 10 - 0.01,
+                'days' => [7, 30, 90, 180, 365][array_rand([7, 30, 90, 180, 365])],
+                'status' => rand(0, 1)
+            ]);
+        }
     }
 }

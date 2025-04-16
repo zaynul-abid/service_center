@@ -15,37 +15,42 @@ use Illuminate\Support\Facades\Validator;
 
 class ServiceController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        $search = request('search');
-        $status = request('status');
 
+    public function index(Request $request)
+    {
         $services = Service::query()
-            ->when($search, function($query) use ($search) {
-                $query->where(function($q) use ($search) {
-                    $q->where('booking_id', 'like', "%$search%")
-                        ->orWhere('customer_name', 'like', "%$search%")
-                        ->orWhere('vehicle_number', 'like', "%$search%")
-                        ->orWhere('contact_number_1', 'like', "%$search%")
-                        ->orWhere('vehicle_model', 'like', "%$search%");
+            ->when($request->search, function($query) use ($request) {
+                $query->where(function($q) use ($request) {
+                    $q->where('customer_name', 'like', '%'.$request->search.'%')
+                        ->orWhere('vehicle_number', 'like', '%'.$request->search.'%')
+                        ->orWhere('booking_id', 'like', '%'.$request->search.'%');
                 });
             })
-            ->when($status, function($query) use ($status) {
-                $query->where('status', $status);
+            ->when($request->from_date, function($query) use ($request) {
+                $query->where('booking_date', '>=', $request->from_date);
             })
-            ->orderBy('created_at', 'desc')
-            ->paginate(10)
-            ->withQueryString();
+            ->when($request->to_date, function($query) use ($request) {
+                $query->where('booking_date', '<=', $request->to_date);
+            })
+            ->orderBy('booking_date', 'desc')
+            ->paginate(10);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'desktop_view' => view('services.partials.service_rows', compact('services'))->render(),
+                'mobile_view' => view('services.partials.mobile_service_cards', compact('services'))->render(),
+                'from' => $services->firstItem(),
+                'to' => $services->lastItem(),
+                'total' => $services->total(),
+                'pagination' => $services->appends($request->query())->links('vendor.pagination.bootstrap-4', [
+                    'previousPageText' => '<i class="bi bi-chevron-left"></i>',
+                    'nextPageText' => '<i class="bi bi-chevron-right"></i>'
+                ])->toHtml()
+            ]);
+        }
 
         return view('services.pages.index', compact('services'));
     }
-
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         $companies = Company::all();
@@ -186,13 +191,13 @@ class ServiceController extends Controller
      */
     public function update(Request $request, $id)
     {
-
+//        dd($request);
         $user = Auth::user();
 
         // Find the service record
         $service = Service::findOrFail($id);
 
-        // Validation (same as store)
+
         $request->validate([
             'vehicle_number' => 'required|string|max:255',
             'vehicle_type' => 'required|string|max:100',
@@ -206,8 +211,8 @@ class ServiceController extends Controller
             'contact_number_1' => 'required|string|max:15',
             'contact_number_2' => 'nullable|string|max:15',
             'reference_number' => 'nullable|string|max:100',
-            'booking_date' => 'required|date',
-            'booking_time' => 'required|date_format:H:i',
+            'booking_date' => 'required',
+            'booking_time' => 'required',
             'customer_complaint' => 'nullable|string',
             'service_details' => 'nullable|string',
             'remarks' => 'nullable|string|max:500',

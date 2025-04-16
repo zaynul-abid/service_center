@@ -46,6 +46,7 @@
                 <tr>
                     <th>ID</th>
                     <th>Company Name</th>
+                    <th>Address</th>
                     <th>Contact</th>
                     <th>Plan</th>
                     <th>Plan Amount</th>
@@ -63,6 +64,7 @@
                     <tr>
                         <td>{{ $company->id }}</td>
                         <td>{{ $company->company_name }}</td>
+                        <td>{{ $company->address }}</td>
                         <td>{{ $company->contact_number }}</td>
 
                         <!-- Plan Information -->
@@ -102,7 +104,7 @@
                         <td>
                             <div class="d-flex gap-2">
                                 <a href="{{ route('companies.edit', $company->id) }}" class="btn btn-sm btn-outline-primary" title="Edit">
-                                    <i class="bi bi-pencil-square"></i>
+                                    <i class="bi bi-pencil-square">Edit</i>
                                 </a>
                                 <!-- Trigger button -->
                                 <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $company->id }}">

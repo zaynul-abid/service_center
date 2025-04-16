@@ -102,8 +102,8 @@
                     </div>
 
                     @if($plans->hasPages())
-                        <div class="card-footer bg-light border-top-0 py-3">
-                            {{ $plans->links() }}
+                        <div class="card-footer bg-light border-top-0 py-2">
+                            {{ $plans->onEachSide(1)->links('vendor.pagination.bootstrap-4') }}
                         </div>
                     @endif
                 </div>
