@@ -130,6 +130,20 @@
 
 
         $(document).ready(function() {
+
+            // Select all functionality
+            $('#select-all').on('change', function() {
+                $('tbody input[type="checkbox"]').prop('checked', this.checked);
+            });
+
+            $(document).on('change', 'tbody input[type="checkbox"]', function() {
+                if (!this.checked) {
+                    $('#select-all').prop('checked', false);
+                } else {
+                    const allChecked = $('tbody input[type="checkbox"]').length === $('tbody input[type="checkbox"]:checked').length;
+                    $('#select-all').prop('checked', allChecked);
+                }
+            });
             // Function to apply filters
             function applyFilters() {
                 const status = $('#status-filter').val();

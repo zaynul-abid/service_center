@@ -30,7 +30,12 @@
         </td>
         <td class="fw-medium text-gray-900 border-end">₹{{ number_format($service->cost, 2) }}</td>
         <td class="border-end">
-            @if (!empty($service->photos) && is_string($service->photos))
+            @php
+                // Decode JSON if string, or pass as-is if already an array
+                $photos = is_string($service->photos) ? json_decode($service->photos, true) : $service->photos;
+            @endphp
+
+            @if (!empty($photos) && is_array($photos) && count($photos) > 0)
                 <button class="btn btn-sm btn-outline-secondary view-images-btn"
                         data-service-id="{{ $service->id }}">
                     <i class="bi bi-images me-1"></i> View
@@ -39,6 +44,7 @@
                 <span class="text-gray-400 small">-</span>
             @endif
         </td>
+
         <td class="pe-3 text-end">
             <div class="d-flex justify-content-end gap-2">
                 <a href="{{ route('services.edit', $service->id) }}"

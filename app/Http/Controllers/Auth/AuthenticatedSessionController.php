@@ -13,9 +13,16 @@ class AuthenticatedSessionController extends Controller
 {
     /**
      * Display the login view.
+     *
+     *
      */
     public function create(): View
     {
+        if (Auth::check()) {
+            Auth::logout();
+            session()->invalidate();
+            session()->regenerateToken();
+        }
         return view('auth.login');
     }
 

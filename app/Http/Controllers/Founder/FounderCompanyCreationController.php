@@ -41,6 +41,7 @@ class FounderCompanyCreationController extends Controller
      */
     public function store(Request $request)
     {
+
         // Basic validation
         $validatedData = $request->validate([
             'company_name' => 'required|string|max:255',
@@ -65,6 +66,8 @@ class FounderCompanyCreationController extends Controller
             'subscription_end_date' => 'required|date|after:subscription_start_date',
         ]);
 
+
+
         DB::beginTransaction();
 
         try {
@@ -85,6 +88,7 @@ class FounderCompanyCreationController extends Controller
                 'company_key' => Company::generateCompanyKey(),
                 'status' => 'active'
             ]);
+
 
             SubscriptionHistory::create([
                 'company_id' => $company->id,

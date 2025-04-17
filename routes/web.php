@@ -26,6 +26,7 @@ Route::get('/',[AuthanticationController::class,'login'])->name('login');
 Route::post('/logout', [AuthanticationController::class, 'logout'])->name('logout');
 
 
+
 // Founder Routes (Only Founder)
 Route::middleware(['auth', 'usertype:founder'])->group(function () {
 
@@ -120,6 +121,7 @@ Route::middleware(['auth', 'usertype:admin'])->group(function () {
     Route::get('/admin/service/reports', [ReportController::class, 'showServiceReport'])->name('admin.service.report');
     Route::get('/admin/employee/reports', [ReportController::class, 'showEmployeeReport'])->name('admin.employee.report');
     Route::get('/admin/reports/service/download', [ReportController::class, 'downloadServiceReport'])->name('report.service.download');
+
     Route::get('/admin/reports/employee/download', [ReportController::class, 'downloadEmployeeReport'])->name('report.employee.download');
 
     Route::get('/report/service-cost', [ReportController::class, 'showServiceCost'])->name('report.service.cost');

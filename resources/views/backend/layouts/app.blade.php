@@ -49,6 +49,8 @@
             function showImage(imageUrl) {
                 document.getElementById('largeImage').src = imageUrl;
             }
+
+
         </script>
 
 

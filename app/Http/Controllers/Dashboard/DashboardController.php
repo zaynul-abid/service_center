@@ -47,13 +47,13 @@ class DashboardController extends Controller
         $employee = Employee::where('user_id', auth()->user()->id)->first();
 
         if ($employee) {
-            $assignedServices = $employee->assignedServices;
+            $assignedServices = $employee->assignedServices()->paginate(10); // 10 items per page
         } else {
-            $assignedServices = collect();
+            $assignedServices = collect(); // Empty collection if no employee found
         };
 
         return view('employees.pages.dashboard', compact('assignedServices', 'employee'));
     }
 
 
-}
+    }

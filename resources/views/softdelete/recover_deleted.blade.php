@@ -79,20 +79,20 @@
                         </button>
                     </li>
                     @if(auth()->user()->usertype === 'founder')
-                    <li class="nav-item flex-shrink-0" role="presentation">
-                        <button class="nav-link d-flex align-items-center gap-2" id="companies-tab" data-bs-toggle="pill" data-bs-target="#companies" type="button" role="tab">
-                            <i class="fas fa-building"></i>
-                            <span>Companies</span>
-                            <span class="badge bg-primary rounded-pill">{{ $deletedCompanies->count() }}</span>
-                        </button>
-                    </li>
-                    <li class="nav-item flex-shrink-0" role="presentation">
-                        <button class="nav-link d-flex align-items-center gap-2" id="plans-tab" data-bs-toggle="pill" data-bs-target="#plans" type="button" role="tab">
-                            <i class="fas fa-clipboard-list"></i>
-                            <span>Plans</span>
-                            <span class="badge bg-primary rounded-pill">{{ $deletedPlans->count() }}</span>
-                        </button>
-                    </li>
+                        <li class="nav-item flex-shrink-0" role="presentation">
+                            <button class="nav-link d-flex align-items-center gap-2" id="companies-tab" data-bs-toggle="pill" data-bs-target="#companies" type="button" role="tab">
+                                <i class="fas fa-building"></i>
+                                <span>Companies</span>
+                                <span class="badge bg-primary rounded-pill">{{ $deletedCompanies->count() }}</span>
+                            </button>
+                        </li>
+                        <li class="nav-item flex-shrink-0" role="presentation">
+                            <button class="nav-link d-flex align-items-center gap-2" id="plans-tab" data-bs-toggle="pill" data-bs-target="#plans" type="button" role="tab">
+                                <i class="fas fa-clipboard-list"></i>
+                                <span>Plans</span>
+                                <span class="badge bg-primary rounded-pill">{{ $deletedPlans->count() }}</span>
+                            </button>
+                        </li>
                     @endif
                 </ul>
             </div>
@@ -451,238 +451,379 @@
 
             <!-- Companies Tab -->
             @if(auth()->user()->usertype === 'founder')
-            <div class="tab-pane fade" id="companies" role="tabpanel">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-white py-3">
-                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
-                            <h5 class="mb-2 mb-md-0">
-                                <i class="fas fa-building text-primary me-2"></i>Deleted Companies
-                            </h5>
-                            <div class="text-muted small">
-                                Showing {{ $deletedCompanies->count() }} item{{ $deletedCompanies->count() !== 1 ? 's' : '' }}
+                <div class="tab-pane fade" id="companies" role="tabpanel">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white py-3">
+                            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                                <h5 class="mb-2 mb-md-0">
+                                    <i class="fas fa-building text-primary me-2"></i>Deleted Companies
+                                </h5>
+                                <div class="text-muted small">
+                                    Showing {{ $deletedCompanies->count() }} item{{ $deletedCompanies->count() !== 1 ? 's' : '' }}
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    @if($deletedCompanies->isEmpty())
-                        <div class="card-body">
-                            <div class="alert alert-light border text-center py-4">
-                                <i class="fas fa-building-circle-xmark fa-2x text-muted mb-3"></i>
-                                <h5 class="text-muted">No deleted companies found</h5>
-                                <p class="mb-0">Deleted companies will appear here</p>
+                        @if($deletedCompanies->isEmpty())
+                            <div class="card-body">
+                                <div class="alert alert-light border text-center py-4">
+                                    <i class="fas fa-building-circle-xmark fa-2x text-muted mb-3"></i>
+                                    <h5 class="text-muted">No deleted companies found</h5>
+                                    <p class="mb-0">Deleted companies will appear here</p>
+                                </div>
                             </div>
-                        </div>
-                    @else
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0">
-                                <thead class="bg-light">
-                                <tr>
-                                    <th width="80">ID</th>
-                                    <th>Company Name</th>
-                                    <th>Plan</th>
-                                    <th width="160">Deleted</th>
-                                    <th width="120" class="text-end">Actions</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                @foreach($deletedCompanies as $company)
+                        @else
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="bg-light">
                                     <tr>
-                                        <td class="text-muted align-middle">#{{ $company->id }}</td>
-                                        <td class="align-middle fw-medium">{{ $company->company_name }}</td>
-                                        <td class="align-middle">{{ $company->plan->name }}</td>
-                                        <td class="align-middle">
+                                        <th width="80">ID</th>
+                                        <th>Company Name</th>
+                                        <th>Plan</th>
+                                        <th width="160">Deleted</th>
+                                        <th width="120" class="text-end">Actions</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    @foreach($deletedCompanies as $company)
+                                        <tr>
+                                            <td class="text-muted align-middle">#{{ $company->id }}</td>
+                                            <td class="align-middle fw-medium">{{ $company->company_name }}</td>
+                                            <td class="align-middle">{{ $company->plan->name }}</td>
+                                            <td class="align-middle">
                                             <span class="badge bg-light text-dark">
                                                 <i class="far fa-clock me-1"></i>
                                                 {{ $company->deleted_at->diffForHumans() }}
                                             </span>
-                                        </td>
-                                        <td class="align-middle text-end">
-                                            <div class="btn-group btn-group-sm" role="group">
-                                                <a href="{{ route('softdelete.restore.company', $company->id) }}"
-                                                   class="btn btn-outline-success rounded-start-2"
-                                                   data-bs-toggle="tooltip"
-                                                   title="Restore">
-                                                    <i class="fas fa-trash-restore"></i>
-                                                </a>
-                                                <form method="POST" action="{{ route('softdelete.forceDelete.company', $company->id) }}" class="d-inline">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit"
-                                                            class="btn btn-outline-danger rounded-end-2"
-                                                            data-bs-toggle="tooltip"
-                                                            title="Delete Permanently"
-                                                            onclick="return confirm('Permanently delete {{ $company->name }}?')">
-                                                        <i class="fas fa-trash-alt"></i>
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                        @if($deletedCompanies->hasPages())
-                            <div class="card-footer bg-white">
-                                {{ $deletedCompanies->links() }}
+                                            </td>
+                                            <td class="align-middle text-end">
+                                                <div class="btn-group btn-group-sm" role="group">
+                                                    <a href="{{ route('softdelete.restore.company', $company->id) }}"
+                                                       class="btn btn-outline-success rounded-start-2"
+                                                       data-bs-toggle="tooltip"
+                                                       title="Restore">
+                                                        <i class="fas fa-trash-restore"></i>
+                                                    </a>
+                                                    <form method="POST" action="{{ route('softdelete.forceDelete.company', $company->id) }}" class="d-inline">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit"
+                                                                class="btn btn-outline-danger rounded-end-2"
+                                                                data-bs-toggle="tooltip"
+                                                                title="Delete Permanently"
+                                                                onclick="return confirm('Permanently delete {{ $company->company_name }}?')">
+                                                            <i class="fas fa-trash-alt"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                    </tbody>
+                                </table>
                             </div>
+                            @if($deletedCompanies->hasPages())
+                                <div class="card-footer bg-white">
+                                    {{ $deletedCompanies->links() }}
+                                </div>
+                            @endif
                         @endif
-                    @endif
-                </div>
-            </div>
-
-            <!-- Plans Tab -->
-            <div class="tab-pane fade" id="plans" role="tabpanel">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-white py-3">
-                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
-                            <h5 class="mb-2 mb-md-0">
-                                <i class="fas fa-clipboard-list text-primary me-2"></i>Deleted Plans
-                            </h5>
-                            <div class="text-muted small">
-                                Showing {{ $deletedPlans->count() }} item{{ $deletedPlans->count() !== 1 ? 's' : '' }}
-                            </div>
-                        </div>
                     </div>
+                </div>
 
-                    @if($deletedPlans->isEmpty())
-                        <div class="card-body">
-                            <div class="alert alert-light border text-center py-4">
-                                <i class="fas fa-clipboard fa-2x text-muted mb-3"></i>
-                                <h5 class="text-muted">No deleted plans found</h5>
-                                <p class="mb-0">Deleted plans will appear here</p>
+                <!-- Plans Tab -->
+                <div class="tab-pane fade" id="plans" role="tabpanel">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white py-3">
+                            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                                <h5 class="mb-2 mb-md-0">
+                                    <i class="fas fa-clipboard-list text-primary me-2"></i>Deleted Plans
+                                </h5>
+                                <div class="text-muted small">
+                                    Showing {{ $deletedPlans->count() }} item{{ $deletedPlans->count() !== 1 ? 's' : '' }}
+                                </div>
                             </div>
                         </div>
-                    @else
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0">
-                                <thead class="bg-light">
-                                <tr>
-                                    <th width="80">ID</th>
-                                    <th>Plan Name</th>
-                                    <th>Price</th>
-                                    <th>Duration</th>
-                                    <th width="160">Deleted</th>
-                                    <th width="120" class="text-end">Actions</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                @foreach($deletedPlans as $plan)
+
+                        @if($deletedPlans->isEmpty())
+                            <div class="card-body">
+                                <div class="alert alert-light border text-center py-4">
+                                    <i class="fas fa-clipboard fa-2x text-muted mb-3"></i>
+                                    <h5 class="text-muted">No deleted plans found</h5>
+                                    <p class="mb-0">Deleted plans will appear here</p>
+                                </div>
+                            </div>
+                        @else
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="bg-light">
                                     <tr>
-                                        <td class="text-muted align-middle">#{{ $plan->id }}</td>
-                                        <td class="align-middle fw-medium">{{ $plan->name }}</td>
-                                        <td class="align-middle">{{ config('settings.currency_symbol') }}{{ $plan->amount }}</td>
-                                        <td class="align-middle">{{ $plan->days }} days</td>
-                                        <td class="align-middle">
+                                        <th width="80">ID</th>
+                                        <th>Plan Name</th>
+                                        <th>Price</th>
+                                        <th>Duration</th>
+                                        <th width="160">Deleted</th>
+                                        <th width="120" class="text-end">Actions</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    @foreach($deletedPlans as $plan)
+                                        <tr>
+                                            <td class="text-muted align-middle">#{{ $plan->id }}</td>
+                                            <td class="align-middle fw-medium">{{ $plan->name }}</td>
+                                            <td class="align-middle">{{ config('settings.currency_symbol') }}{{ $plan->amount }}</td>
+                                            <td class="align-middle">{{ $plan->days }} days</td>
+                                            <td class="align-middle">
                                             <span class="badge bg-light text-dark">
                                                 <i class="far fa-clock me-1"></i>
                                                 {{ $plan->deleted_at->diffForHumans() }}
                                             </span>
-                                        </td>
-                                        <td class="align-middle text-end">
-                                            <div class="btn-group btn-group-sm" role="group">
-                                                <a href="{{ route('softdelete.restore.plan', $plan->id) }}"
-                                                   class="btn btn-outline-success rounded-start-2"
-                                                   data-bs-toggle="tooltip"
-                                                   title="Restore">
-                                                    <i class="fas fa-trash-restore"></i>
-                                                </a>
-                                                <form method="POST" action="{{ route('softdelete.forceDelete.plan', $plan->id) }}" class="d-inline">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit"
-                                                            class="btn btn-outline-danger rounded-end-2"
-                                                            data-bs-toggle="tooltip"
-                                                            title="Delete Permanently"
-                                                            onclick="return confirm('Permanently delete {{ $plan->name }} plan?')">
-                                                        <i class="fas fa-trash-alt"></i>
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                        @if($deletedPlans->hasPages())
-                            <div class="card-footer bg-white">
-                                {{ $deletedPlans->links() }}
+                                            </td>
+                                            <td class="align-middle text-end">
+                                                <div class="btn-group btn-group-sm" role="group">
+                                                    <a href="{{ route('softdelete.restore.plan', $plan->id) }}"
+                                                       class="btn btn-outline-success rounded-start-2"
+                                                       data-bs-toggle="tooltip"
+                                                       title="Restore">
+                                                        <i class="fas fa-trash-restore"></i>
+                                                    </a>
+                                                    <form method="POST" action="{{ route('softdelete.forceDelete.plan', $plan->id) }}" class="d-inline">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit"
+                                                                class="btn btn-outline-danger rounded-end-2"
+                                                                data-bs-toggle="tooltip"
+                                                                title="Delete Permanently"
+                                                                onclick="return confirm('Permanently delete {{ $plan->name }} plan?')">
+                                                            <i class="fas fa-trash-alt"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                    </tbody>
+                                </table>
                             </div>
+                            @if($deletedPlans->hasPages())
+                                <div class="card-footer bg-white">
+                                    {{ $deletedPlans->links() }}
+                                </div>
+                            @endif
                         @endif
-                    @endif
+                    </div>
                 </div>
-            </div>
             @endif
         </div>
     </div>
 
     <style>
-        /* Custom Styles */
+            /* General Container */
+        .container-fluid {
+            padding: 1.5rem; /* Adjusted padding for main container */
+            margin: 0; /* Ensure no unwanted margins */
+        }
+
+        /* Header Section */
+        h1.h3 {
+            font-size: 1.5rem; /* Reduced font size */
+            margin-bottom: 0.5rem; /* Adjusted margin */
+            padding: 0.25rem 0; /* Added padding for alignment */
+        }
+
+        .text-muted {
+            font-size: 0.85rem; /* Reduced font size */
+            margin: 0.25rem 0; /* Adjusted margin */
+        }
+
+        /* Alerts */
+        .alert {
+            font-size: 0.9rem; /* Reduced font size */
+            padding: 0.75rem 1rem; /* Adjusted padding */
+            margin: 1rem 0; /* Adjusted margin */
+            border-radius: 0.375rem; /* Slightly rounded corners */
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+        }
+
+        .alert .btn-close {
+            padding: 0.75rem; /* Adjusted padding for close button */
+        }
+
+        /* Tab Navigation */
+        #recycleBinTabs {
+            scrollbar-width: none; /* Firefox */
+            margin-bottom: 1rem; /* Added margin for spacing */
+        }
+
+        #recycleBinTabs::-webkit-scrollbar {
+            display: none; /* Chrome/Safari */
+        }
+
+        .nav-pills .nav-link {
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem; /* Adjusted padding */
+            margin: 0.25rem; /* Added margin for spacing */
+            font-size: 0.9rem; /* Reduced font size */
+            color: #6c757d;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+        }
+
+        .nav-pills .nav-link.active {
+            background-color: rgba(13, 110, 253, 0.1);
+            color: #0d6efd;
+            border-color: rgba(13, 110, 253, 0.2);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Enhanced shadow for active tab */
+        }
+
+        .nav-pills .nav-link:hover:not(.active) {
+            background-color: #f8f9fa;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.08); /* Shadow on hover */
+        }
+
+        .badge.bg-primary {
+            font-size: 0.75rem; /* Reduced font size */
+            padding: 0.25rem 0.5rem; /* Adjusted padding */
+        }
+
+        /* Card Styles */
+        .card {
+            border: none;
+            border-radius: 0.5rem; /* Rounded corners */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Enhanced shadow */
+            margin-bottom: 1.5rem; /* Adjusted margin */
+        }
+
+        .card-header {
+            padding: 1rem 1.5rem; /* Adjusted padding */
+            margin-bottom: 0.5rem; /* Added margin for spacing */
+            border-bottom: 1px solid #e9ecef; /* Subtle border */
+        }
+
+        .card-body {
+            padding: 1.5rem; /* Adjusted padding */
+        }
+
+        .card-footer {
+            padding: 1rem 1.5rem; /* Adjusted padding */
+            background-color: transparent; /* Ensure no background */
+        }
+
+        /* Table Styles */
+        .table {
+            font-size: 0.9rem; /* Reduced font size */
+            margin-bottom: 0; /* Remove default margin */
+        }
+
+        .table thead th {
+            font-size: 0.75rem; /* Reduced font size */
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #6c757d;
+            padding: 0.75rem 1rem; /* Adjusted padding */
+            border-bottom: 1px solid #dee2e6; /* Subtle border */
+        }
+
+        .table tbody td {
+            padding: 0.75rem 1rem; /* Adjusted padding */
+            vertical-align: middle;
+            border-bottom: 1px solid #f0f0f0; /* Subtle row separator */
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: rgba(0, 0, 0, 0.03); /* Subtle hover effect */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Row shadow on hover */
+        }
+
+        /* Avatar */
         .avatar-sm {
             width: 36px;
             height: 36px;
             display: flex;
             align-items: center;
             justify-content: center;
+            border-radius: 50%; /* Ensure circular shape */
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Subtle shadow */
         }
 
-        /* Tab Navigation */
-        #recycleBinTabs {
-            scrollbar-width: none; /* Firefox */
-        }
-        #recycleBinTabs::-webkit-scrollbar {
-            display: none; /* Chrome/Safari */
-        }
-        .nav-pills .nav-link {
-            border-radius: 0.5rem;
-            padding: 0.5rem 1rem;
-            color: #6c757d;
-            border: 1px solid transparent;
-            transition: all 0.2s ease;
-        }
-        .nav-pills .nav-link.active {
-            background-color: rgba(13, 110, 253, 0.1);
-            color: #0d6efd;
-            border-color: rgba(13, 110, 253, 0.2);
-        }
-        .nav-pills .nav-link:hover:not(.active) {
-            background-color: #f8f9fa;
+        /* Buttons */
+        .btn-group-sm .btn {
+            font-size: 0.85rem; /* Reduced font size */
+            padding: 0.25rem 0.5rem; /* Adjusted padding */
+            border-radius: 0.25rem; /* Consistent rounded corners */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+            margin-right: 0.25rem; /* Margin to separate buttons */
         }
 
-        /* Table Styles */
-        .table {
-            --bs-table-bg: transparent;
-        }
-        .table thead th {
-            border-bottom-width: 1px;
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            letter-spacing: 0.5px;
-            color: #6c757d;
+        .btn-group-sm .btn:last-child {
+            margin-right: 0; /* Remove margin for the last button */
         }
 
-        /* Card Styles */
-        .card {
-            border: none;
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        .btn-outline-success:hover,
+        .btn-outline-danger:hover {
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15); /* Enhanced shadow on hover */
+        }
+
+        /* Ensure consistent button shapes */
+        .btn-group-sm .btn {
+            border-radius: 0.25rem !important; /* Override custom radius classes */
+        }
+
+        /* Badges */
+        .badge.bg-light {
+            font-size: 0.8rem; /* Reduced font size */
+            padding: 0.25rem 0.5rem; /* Adjusted padding */
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+        }
+
+        /* Empty State Alerts */
+        .alert-light {
+            font-size: 0.9rem; /* Reduced font size */
+            padding: 1.5rem; /* Adjusted padding */
+            margin: 1rem; /* Adjusted margin */
+            border-radius: 0.375rem; /* Rounded corners */
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+        }
+
+        /* Pagination */
+        .pagination {
+            margin: 1rem 0; /* Adjusted margin */
+            font-size: 0.85rem; /* Reduced font size */
+        }
+
+        .page-link {
+            padding: 0.25rem 0.75rem; /* Adjusted padding */
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+        }
+
+        .page-link:hover {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Enhanced shadow on hover */
         }
 
         /* Responsive Adjustments */
         @media (max-width: 767.98px) {
+            .container-fluid {
+                padding: 1rem; /* Reduced padding for smaller screens */
+            }
+
             .table-responsive {
                 border: 0;
             }
+
             .table thead {
                 display: none;
             }
+
             .table tr {
                 display: block;
                 margin-bottom: 1rem;
                 border: 1px solid #dee2e6;
                 border-radius: 0.25rem;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Subtle shadow for mobile cards */
             }
+
             .table td {
                 display: flex;
                 justify-content: space-between;
@@ -690,14 +831,27 @@
                 padding: 0.75rem;
                 border-bottom: 1px solid #f0f0f0;
             }
+
             .table td:before {
                 content: attr(data-label);
                 font-weight: 600;
                 margin-right: 1rem;
                 color: #6c757d;
+                font-size: 0.85rem; /* Reduced font size */
             }
+
             .table td:last-child {
                 border-bottom: 0;
+            }
+
+            .nav-pills .nav-link {
+                font-size: 0.85rem; /* Further reduced font size for mobile */
+                padding: 0.4rem 0.8rem; /* Adjusted padding */
+            }
+
+            .btn-group-sm .btn {
+                margin-bottom: 0.25rem; /* Added margin for mobile stacking */
+                margin-right: 0.25rem; /* Maintain horizontal margin */
             }
         }
     </style>

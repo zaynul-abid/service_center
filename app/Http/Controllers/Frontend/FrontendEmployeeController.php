@@ -13,20 +13,20 @@ class FrontendEmployeeController extends Controller
 {
 
 
-    public function index()
-    {
-        $employee = Employee::where('user_id', auth()->user()->id)->first();
-
-        if ($employee) {
-            $assignedServices = $employee->assignedServices; // Get assigned services
-        } else {
-            $assignedServices = collect(); // Empty collection if no employee found
-        };
-
-
-
-        return view('employees.pages.dashboard', compact('assignedServices', 'employee'));
-    }
+//    public function index()
+//    {
+//        $employee = Employee::where('user_id', auth()->user()->id)->first();
+//
+//        if ($employee) {
+//            $assignedServices = $employee->assignedServices; // Get assigned services
+//        } else {
+//            $assignedServices = collect(); // Empty collection if no employee found
+//        };
+//
+//
+//
+//        return view('employees.pages.dashboard', compact('assignedServices', 'employee'));
+//    }
 
 
 
@@ -48,16 +48,15 @@ class FrontendEmployeeController extends Controller
         $employee = Employee::where('user_id', auth()->user()->id)->first();
 
         if ($employee) {
-            $assignedServices = $employee->assignedServices; // Get assigned services
+            $assignedServices = $employee->assignedServices()->paginate(10); // Use relationship query
+            \Log::info('Assigned services fetched: ', $assignedServices->items()); // Debug log
         } else {
-            $assignedServices = collect(); // Empty collection if no employee found
-        };
-
-
+            $assignedServices = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10); // Empty paginator
+            \Log::warning('No employee found for user ID: ' . auth()->user()->id); // Debug log
+        }
 
         return view('employees.pages.status', compact('assignedServices', 'employee'));
     }
-
     public function updateStatus(Request $request, $id)
     {
 

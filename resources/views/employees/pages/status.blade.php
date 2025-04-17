@@ -89,11 +89,6 @@
                                     <i class="bi bi-arrow-repeat me-1"></i> Update
                                 </button>
                                 </form>
-                                @if(!empty($service->photos) && is_string($service->photos))
-                                    <button class="btn btn-sm btn-info ms-1" data-bs-toggle="modal" data-bs-target="#photosModal{{ $service->id }}">
-                                        <i class="bi bi-images"></i>
-                                    </button>
-                                @endif
                             </td>
                         </tr>
                     @endforeach
@@ -107,6 +102,13 @@
                     No services assigned to you yet.
                 </div>
             @endif
+
+            <!-- Pagination -->
+            <div class="d-flex justify-content-center mt-3" id="pagination-container">
+                @if($assignedServices instanceof \Illuminate\Pagination\AbstractPaginator)
+                    {{ $assignedServices->links('pagination::bootstrap-5') }}
+                @endif
+            </div>
         </div>
     </div>
 
@@ -159,8 +161,8 @@
             const notesInput = form.querySelector('.notes-input');
 
             if (selectElement.value === 'Completed') {
-                notesInput.removeAttribute('readonly');
-                notesInput.style.backgroundColor = '';
+                notesInput.setAttribute('readonly', true);
+                notesInput.style.backgroundColor = '#e9ecef';
             } else {
                 notesInput.removeAttribute('readonly');
                 notesInput.style.backgroundColor = '';
@@ -173,19 +175,35 @@
             min-width: 120px;
             cursor: pointer;
             transition: all 0.2s;
+            font-size: 0.85rem; /* Reduced font size */
+            padding: 0.25rem 0.5rem; /* Adjusted padding */
         }
 
         .status-select:hover {
             border-color: #0d6efd;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Added subtle shadow on hover */
         }
 
         .notes-input {
             width: 100%;
             min-width: 150px;
+            font-size: 0.85rem; /* Reduced font size */
+            padding: 0.25rem 0.5rem; /* Adjusted padding */
+            margin: 0.25rem 0; /* Added margin for spacing */
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05); /* Subtle inner shadow */
         }
 
         .update-btn {
             min-width: 90px;
+            font-size: 0.85rem; /* Reduced font size */
+            padding: 0.25rem 0.75rem; /* Adjusted padding */
+            margin: 0.25rem 0; /* Added margin for spacing */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Added shadow */
+            transition: box-shadow 0.2s;
+        }
+
+        .update-btn:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* Enhanced shadow on hover */
         }
 
         .text-truncate {
@@ -196,10 +214,60 @@
 
         .btn-info {
             color: white;
+            font-size: 0.85rem; /* Reduced font size */
+            padding: 0.25rem 0.75rem; /* Adjusted padding */
         }
 
         .notes-cell {
             min-width: 150px;
+            padding: 0.5rem; /* Adjusted padding */
+        }
+
+        .card {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Added card shadow */
+            margin: 1.5rem; /* Increased margin for better spacing */
+            border-radius: 0.5rem; /* Slightly rounded corners */
+        }
+
+        .card-header {
+            padding: 1rem 1.5rem; /* Increased padding */
+            margin-bottom: 0.5rem; /* Added margin for spacing */
+        }
+
+        .card-body {
+            padding: 1.5rem; /* Increased padding */
+        }
+
+        .table {
+            font-size: 0.9rem; /* Reduced font size for table */
+            margin-bottom: 1rem; /* Added margin for spacing */
+        }
+
+        .table th, .table td {
+            padding: 0.75rem; /* Adjusted padding for table cells */
+            vertical-align: middle;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: rgba(0, 0, 0, 0.03); /* Subtle hover effect */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Row shadow on hover */
+        }
+
+        .alert {
+            font-size: 0.9rem; /* Reduced font size for alerts */
+            margin: 1rem 1.5rem; /* Adjusted margin */
+            padding: 0.75rem 1rem; /* Adjusted padding */
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); /* Added shadow for alerts */
+        }
+
+        #searchInput {
+            font-size: 0.85rem; /* Reduced font size */
+            padding: 0.25rem 0.75rem; /* Adjusted padding */
+            margin-right: 0.5rem; /* Added margin for spacing */
+        }
+
+        #pagination-container {
+            margin-top: 1.5rem; /* Increased margin */
         }
     </style>
 @endsection
