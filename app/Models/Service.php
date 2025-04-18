@@ -46,6 +46,7 @@ Service extends Model
         'employee_id',
         'service_status',
         'employee_remarks' ,
+        'technician_notes',
         'status',
     ];
 

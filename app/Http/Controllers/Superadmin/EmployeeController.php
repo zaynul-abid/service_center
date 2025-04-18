@@ -166,19 +166,16 @@ class EmployeeController extends Controller
 
     public function getServices($id)
     {
-
-
         $employee = Employee::with('services')->findOrFail($id);
-
 
         $services = $employee->services->map(function ($service) {
             return [
                 'booking_id' => $service->booking_id,
-                'employee_remarks' => $service->employee_remarks ?? 'No Remarks',
-                'vehicle_number' => $service->vehicle_number ?? 'No Vehicle Number',
-                'customer_name' => $service->customer_name ?? 'No Customer Name',
-                'service_status' => $service->service_status ?? 'No Service Status',
-
+                'employee_remarks' => $service->employee_remarks ?? '-',
+                'vehicle_number' => $service->vehicle_number ?? '-',
+                'customer_name' => $service->customer_name ?? '-',
+                'service_status' => $service->service_status ?? '-',
+                'technician_notes' => $service->technician_notes ?? '-', // Add this field
             ];
         });
 

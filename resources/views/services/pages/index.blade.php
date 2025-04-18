@@ -106,6 +106,7 @@
                                 <th class="border-end">Contact</th>
                                 <th class="border-end">Delivery</th>
                                 <th class="border-end">Status</th>
+                                <th class="border-end">Emp Status</th>
                                 <th class="border-end">Cost</th>
                                 <th class="border-end">images</th>
                                 <th class="pe-3 text-end">Actions</th>

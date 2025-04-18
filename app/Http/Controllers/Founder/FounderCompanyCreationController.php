@@ -92,14 +92,23 @@ class FounderCompanyCreationController extends Controller
 
             SubscriptionHistory::create([
                 'company_id' => $company->id,
+                'company_name' => $company->company_name,
+                'contact_number' => $company->contact_number,
+                'address' => $company->address,
+                'registration_number' => $company->registration_number,
+                'company_key' => $company->company_key,
+
                 'plan_id' => $plan->id,
                 'plan_name' => $plan->name,
-                'plan_amount' => $validatedData['plan_amount'],
-                'discount' => $validatedData['discount'] ?? 0,
-                'final_amount' => $validatedData['final_price'],
+                'plan_amount' => $plan->amount,
+                'plan_duration_days' => $plan->days,
+
                 'start_date' => $validatedData['subscription_start_date'],
                 'end_date' => $validatedData['subscription_end_date'],
-                'status' => 'active'
+                'final_amount' => $validatedData['final_price'],
+                'discount' => $validatedData['discount'] ?? 0,
+                'status' => 'active',
+                'is_renewal' => false // This can be true if you're calling this a renewal
             ]);
 
             DB::commit();

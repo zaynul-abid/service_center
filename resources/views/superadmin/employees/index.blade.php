@@ -126,17 +126,18 @@
                 </table>
             </div>
 
+    <!-- Employee Services Modal -->
     <div class="modal fade" id="employeeServicesModal" tabindex="-1" aria-labelledby="employeeServicesModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-scrollable">
-            <div class="modal-content shadow-lg border-0">
-                <div class="modal-header bg-dark text-white">
-                    <h5 class="modal-title">Employee Services</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="employeeServicesModalLabel">Employee Services</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <!-- Loading indicator -->
-                    <div id="loadingIndicator" class="text-center py-4">
-                        <div class="spinner-border text-primary" role="status">
+                    <div id="loadingIndicator" class="text-center py-3">
+                        <div class="spinner-border" role="status">
                             <span class="visually-hidden">Loading...</span>
                         </div>
                         <p class="mt-2">Loading services...</p>
@@ -145,11 +146,12 @@
                     <!-- Services Table (initially hidden) -->
                     <div id="servicesContainer" style="display: none;">
                         <div class="table-responsive">
-                            <table class="table table-bordered table-hover mb-0 shadow-sm">
-                                <thead class="table-light">
+                            <table class="table table-bordered table-hover mb-0">
+                                <thead>
                                 <tr>
                                     <th>Booking ID</th>
                                     <th>Employee Remarks</th>
+                                    <th>Technician Notes</th>
                                     <th>Vehicle Number</th>
                                     <th>Customer Name</th>
                                     <th>Service Status</th>
@@ -161,8 +163,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <!-- Close table button (initially hidden) -->
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close Modal</button>
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close Modal</button>
                 </div>
             </div>
         </div>
@@ -173,6 +174,150 @@
         </div>
     </div>
 </div>
+
+<style>
+    /* Modal styling */
+    .modal-content {
+        border: none;
+        border-radius: 8px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+    }
+
+    .modal-dialog {
+        max-width: 90%;
+        margin: 1rem auto;
+    }
+
+    .modal-header {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .modal-title {
+        font-size: 1rem;
+        font-weight: 500;
+    }
+
+    .modal-body {
+        padding: 1rem;
+        font-size: 0.85rem;
+        line-height: 1.4;
+    }
+
+    .modal-footer {
+        padding: 0.75rem 1rem;
+        border-top: 1px solid #dee2e6;
+    }
+
+    /* Table styling */
+    .table {
+        font-size: 0.8rem;
+        margin-bottom: 0;
+    }
+
+    .table th,
+    .table td {
+        padding: 0.5rem;
+        vertical-align: middle;
+        border: 1px solid #dee2e6;
+        white-space: nowrap; /* Prevent text wrapping */
+    }
+
+    .table th {
+        font-weight: 500;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    .table-responsive {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 6px;
+        overflow-x: auto; /* Ensure horizontal scrolling */
+    }
+
+    /* Loading indicator */
+    .spinner-border {
+        width: 1.25rem;
+        height: 1.25rem;
+    }
+
+    #loadingIndicator p {
+        font-size: 0.8rem;
+        margin-top: 0.5rem;
+    }
+
+    /* Buttons */
+    .btn-sm {
+        font-size: 0.75rem;
+        padding: 0.3rem 0.6rem;
+        border-radius: 4px;
+    }
+
+    /* Mobile-specific adjustments */
+    @media (max-width: 576px) {
+        .modal-dialog {
+            max-width: 100%;
+            margin: 0;
+            height: 100%;
+        }
+
+        .modal-content {
+            border-radius: 0; /* Remove border radius for full-screen effect */
+            box-shadow: none; /* Optional: remove shadow for cleaner mobile look */
+            height: 100%;
+        }
+
+        .modal-header {
+            padding: 0.5rem 0.75rem;
+        }
+
+        .modal-title {
+            font-size: 0.9rem;
+        }
+
+        .modal-body {
+            padding: 0.75rem;
+            font-size: 0.8rem;
+        }
+
+        .modal-footer {
+            padding: 0.5rem 0.75rem;
+        }
+
+        .table {
+            font-size: 0.75rem;
+        }
+
+        .table th,
+        .table td {
+            padding: 0.4rem;
+            font-size: 0.7rem;
+        }
+
+        .table-responsive {
+            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+        }
+
+        .btn-sm {
+            font-size: 0.7rem;
+            padding: 0.25rem 0.5rem;
+        }
+
+        #loadingIndicator .spinner-border {
+            width: 1rem;
+            height: 1rem;
+        }
+
+        #loadingIndicator p {
+            font-size: 0.75rem;
+        }
+    }
+</style>
 <script>
     $(document).on('click', '.view-status-btn', function() {
         let employeeId = $(this).data('id');
@@ -201,14 +346,16 @@
                     // Populate the table
                     response.forEach(function(service) {
                         let serviceRow = `
-                        <tr>
-                            <td>${service.booking_id}</td>
-                            <td>${service.employee_remarks || 'N/A'}</td>
-                            <td>${service.vehicle_number}</td>
-                            <td>${service.customer_name}</td>
-                            <td><span class="badge ${getStatusClass(service.service_status)}">${service.service_status}</span></td>
-                        </tr>
-                    `;
+                <tr>
+                    <td>${service.booking_id}</td>
+                    <td>${service.employee_remarks || 'N/A'}</td>
+                    <td>${service.technician_notes || 'N/A'}</td> <!-- Add Technician Notes field -->
+                    <td>${service.vehicle_number}</td>
+                    <td>${service.customer_name}</td>
+                    <td><span class="badge ${getStatusClass(service.service_status)}">${service.service_status}</span></td>
+
+                </tr>
+            `;
                         $('#servicesList').append(serviceRow);
                     });
 
@@ -217,9 +364,9 @@
                     $('#closeTableBtn').show();
                 } else {
                     // Show message if no services found
-                    $('#servicesList').html('<tr><td colspan="5" class="text-center">No services available for this employee.</td></tr>');
+                    $('#servicesList').html('<tr><td colspan="6" class="text-center">No services available for this employee.</td></tr>'); <!-- Update colspan to 6 -->
                     $('#servicesContainer').show();
-                    $('#closeTableBtn').hide(); // No need close button if empty
+                    $('#closeTableBtn').hide(); // No need for close button if empty
                 }
 
                 // Show the modal

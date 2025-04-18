@@ -77,22 +77,28 @@
                         @endphp
                         @foreach ($services as $service)
                             @php
-                                $daysLeft = $service->days_difference;
+                                $employeeStatus = strtolower($service->service_status);
+                                $serviceStatus = strtolower($service->status);
 
-                                if ($daysLeft < 0) {
-                                    // Overdue
-                                    $badgeClass = 'bg-danger';
-                                    $daysText = 'Overdue by ' . abs($daysLeft) . ' day'.(abs($daysLeft) !== 1 ? 's' : '');
-                                } elseif ($daysLeft == 0) {
-                                    // Due today
-                                    $badgeClass = 'bg-warning text-dark';
-                                    $daysText = 'Due today';
+                                if ($employeeStatus === 'completed' || $serviceStatus === 'completed') {
+                                    $badgeClass = 'bg-secondary';
+                                    $daysText = 'Completed';
                                 } else {
-                                    // Future delivery
-                                    $badgeClass = 'bg-success';
-                                    $daysText = $daysLeft . ' day'.($daysLeft !== 1 ? 's' : '').' remaining';
+                                    $daysLeft = $service->days_difference;
+
+                                    if ($daysLeft < 0) {
+                                        $badgeClass = 'bg-danger';
+                                        $daysText = 'Overdue by ' . abs($daysLeft) . ' day' . (abs($daysLeft) !== 1 ? 's' : '');
+                                    } elseif ($daysLeft == 0) {
+                                        $badgeClass = 'bg-warning text-dark';
+                                        $daysText = 'Due today';
+                                    } else {
+                                        $badgeClass = 'bg-success';
+                                        $daysText = $daysLeft . ' day' . ($daysLeft !== 1 ? 's' : '') . ' remaining';
+                                    }
                                 }
                             @endphp
+
 
                             <tr>
                                 <td>{{ $loop->iteration }}</td>

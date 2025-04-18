@@ -28,6 +28,15 @@
             {{ ucfirst(str_replace('_', ' ', $service->status)) }}
         </span>
         </td>
+        <td class="border-end">
+        <span class="badge rounded-pill py-1 px-3
+            @if($service->status === 'completed') bg-success-light text-success
+            @elseif($service->status === 'in_progress') bg-warning-light text-warning
+            @elseif($service->status === 'pending') bg-info-light text-info
+            @else bg-secondary-light text-secondary @endif">
+            {{ ucfirst(str_replace('_', ' ', $service->service_status)) }}
+        </span>
+        </td>
         <td class="fw-medium text-gray-900 border-end">₹{{ number_format($service->cost, 2) }}</td>
         <td class="border-end">
             @php

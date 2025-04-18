@@ -148,7 +148,9 @@ Route::middleware(['auth', 'usertype:employee'])->group(function () {
 
 
     Route::get('/logged-employee/show-status', [FrontendEmployeeController::class, 'showStatus'])->name('logedEmployee.showStatus');
-    Route::post('/employee/update-status/{id}', [FrontendEmployeeController::class, 'updateStatus'])->name('employee.updateStatus');
+   Route::post('/employee/update-status/{id}', [FrontendEmployeeController::class, 'updateStatus'])->name('employee.updateStatus');
+    Route::post('/employee/update-notes', [FrontendEmployeeController::class, 'updateNotes'])->name('employee.updateNotes');
+
 });
 
 

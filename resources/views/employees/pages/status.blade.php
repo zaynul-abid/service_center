@@ -62,11 +62,9 @@
                                     {{ $service->customer_complaint }}
                                 </div>
                             </td>
+                            <td>{{ \Carbon\Carbon::parse($service->expected_delivery_date)->format('M d') }}</td>
                             <td>
-                                {{ \Carbon\Carbon::parse($service->expected_delivery_date)->format('M d') }}
-                            </td>
-                            <td>
-                                <form method="POST" action="{{ route('employee.updateStatus', $service->id) }}" class="status-form">
+                                <form method="POST" action="{{ route('employee.updateStatus', $service->id) }}" class="status-form d-flex gap-2">
                                     @csrf
                                     <select name="status" class="form-select form-select-sm status-select">
                                         <option value="Pending" {{ $service->service_status == 'Pending' ? 'selected' : '' }}>Pending</option>
@@ -75,14 +73,15 @@
                                         <option value="Cancelled" {{ $service->service_status == 'Cancelled' ? 'selected' : '' }}>Cancelled</option>
                                     </select>
                             </td>
-                            <td class="notes-cell">
-                                <input
-                                    type="text"
-                                    name="employee_remarks"
-                                    class="form-control form-control-sm notes-input"
-                                    value="{{ $service->employee_remarks }}"
-                                    placeholder="Add notes..."
-                                    {{ $service->service_status == 'Completed' ? 'readonly style=background-color:#e9ecef;' : '' }}>
+                            <td class="text-center">
+                                <button type="button"
+                                        class="btn btn-sm btn-info openNotesModal"
+                                        data-id="{{ $service->id }}"
+                                        data-employee-remarks="{{ $service->employee_remarks }}"
+                                        data-technician-notes="{{ $service->technician_notes }}"
+                                        data-status="{{ $service->service_status }}">
+                                    <i class="bi bi-journal-text me-1"></i> Notes
+                                </button>
                             </td>
                             <td>
                                 <button type="submit" class="btn btn-sm btn-primary update-btn">
@@ -112,32 +111,151 @@
         </div>
     </div>
 
-    <!-- Photos Modals -->
-    @foreach($assignedServices as $service)
-        @if(!empty($service->photos) && is_string($service->photos))
-            <div class="modal fade" id="photosModal{{ $service->id }}" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-lg">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Service Photos (#{{ $service->booking_id }})</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <!-- Notes Modal -->
+    <div class="modal fade" id="notesModal" tabindex="-1" aria-labelledby="notesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <form id="notesForm">
+                @csrf
+                <input type="hidden" name="service_id" id="modalServiceId">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Service Notes</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Alert shown when editing is not allowed -->
+                        <div id="editAlert" class="alert alert-warning d-none">
+                            You can't edit the notes because the status is Completed or Cancelled.
                         </div>
-                        <div class="modal-body">
-                            <div class="row">
-                                @foreach(json_decode($service->photos, true) as $photo)
-                                    <div class="col-md-4 mb-3">
-                                        <img src="{{ asset('storage/' . $photo) }}" class="img-fluid rounded" alt="Service photo">
-                                    </div>
-                                @endforeach
-                            </div>
+
+                        <!-- Flash Messages -->
+                        <div id="modalSuccessMessage" class="alert alert-success d-none">
+                            Notes updated successfully!
+                        </div>
+                        <div id="modalErrorMessage" class="alert alert-danger d-none">
+                            Failed to update notes. Please try again.
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="employeeRemarks" class="form-label">Employee Remarks</label>
+                            <textarea class="form-control" id="employeeRemarks" name="employee_remarks" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="technicianNotes" class="form-label">Technician Notes</label>
+                            <textarea class="form-control" id="technicianNotes" name="technician_notes" rows="3"></textarea>
                         </div>
                     </div>
+                    <div class="modal-footer">
+                        <button type="submit" id="saveNotesBtn" class="btn btn-primary">Save</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button> <!-- only one close button -->
+                    </div>
                 </div>
-            </div>
-        @endif
-    @endforeach
+            </form>
+        </div>
+    </div>
+
 
     <script>
+
+
+
+
+
+
+
+        const notesModal = new bootstrap.Modal(document.getElementById('notesModal'));
+
+        document.querySelectorAll('.openNotesModal').forEach(button => {
+            button.addEventListener('click', () => {
+                const serviceId = button.dataset.id;
+                const employeeRemarks = button.dataset.employeeRemarks || '';
+                const technicianNotes = button.dataset.technicianNotes || '';
+                const status = button.dataset.status;
+
+                document.getElementById('modalServiceId').value = serviceId;
+                document.getElementById('employeeRemarks').value = employeeRemarks;
+                document.getElementById('technicianNotes').value = technicianNotes;
+
+                const isEditable = !(status === 'Completed' || status === 'Cancelled');
+
+                // Toggle editability
+                document.getElementById('employeeRemarks').readOnly = !isEditable;
+                document.getElementById('technicianNotes').readOnly = !isEditable;
+                document.getElementById('saveNotesBtn').disabled = !isEditable;
+
+                // Toggle warning message
+                const alertBox = document.getElementById('editAlert');
+                if (!isEditable) {
+                    alertBox.classList.remove('d-none');
+                } else {
+                    alertBox.classList.add('d-none');
+                }
+
+                notesModal.show();
+            });
+        });
+
+        // New JavaScript (for saving the form and displaying success/failure messages)
+        document.getElementById('notesForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+
+            fetch('{{ route("employee.updateNotes") }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': formData.get('_token')
+                },
+                body: formData
+            })
+                .then(res => res.json())
+                .then(data => {
+                    const modalBody = document.querySelector('#notesModal .modal-body');
+
+                    // Clear any previous alert messages if modalBody exists
+                    if (modalBody) {
+                        modalBody.querySelectorAll('.alert').forEach(alert => alert.remove());
+                    }
+
+                    if (data.success) {
+                        // If success, hide the modal and show success message
+                        notesModal.hide();
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: data.message,
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => {
+                            location.reload(); // Refresh to update notes
+                        });
+                    } else {
+                        // If failure, show the error message returned by backend
+                        if (modalBody) {
+                            modalBody.insertAdjacentHTML('beforeend', `
+                        <div class="alert alert-danger mt-3">
+                            ${data.message}
+                        </div>
+                    `);
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error during fetch:', error);
+                    const modalBody = document.querySelector('#notesModal .modal-body');
+                    if (modalBody) {
+                        modalBody.insertAdjacentHTML('beforeend', `
+                    <div class="alert alert-danger mt-3">
+                        An error occurred while saving notes.
+                    </div>
+                `);
+                    }
+                });
+        });
+
+
+
+
         // Search functionality
         document.getElementById('searchInput').addEventListener('keyup', function () {
             const input = this.value.toLowerCase();
@@ -147,63 +265,19 @@
                 row.style.display = text.includes(input) ? '' : 'none';
             });
         });
-
-        // Toggle notes field readonly state
-        document.querySelectorAll('.status-select').forEach(select => {
-            toggleNotesField(select);
-            select.addEventListener('change', function () {
-                toggleNotesField(this);
-            });
-        });
-
-        function toggleNotesField(selectElement) {
-            const form = selectElement.closest('form');
-            const notesInput = form.querySelector('.notes-input');
-
-            if (selectElement.value === 'Completed') {
-                notesInput.setAttribute('readonly', true);
-                notesInput.style.backgroundColor = '#e9ecef';
-            } else {
-                notesInput.removeAttribute('readonly');
-                notesInput.style.backgroundColor = '';
-            }
-        }
     </script>
 
     <style>
         .status-select {
             min-width: 120px;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 0.85rem; /* Reduced font size */
-            padding: 0.25rem 0.5rem; /* Adjusted padding */
-        }
-
-        .status-select:hover {
-            border-color: #0d6efd;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Added subtle shadow on hover */
-        }
-
-        .notes-input {
-            width: 100%;
-            min-width: 150px;
-            font-size: 0.85rem; /* Reduced font size */
-            padding: 0.25rem 0.5rem; /* Adjusted padding */
-            margin: 0.25rem 0; /* Added margin for spacing */
-            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05); /* Subtle inner shadow */
+            font-size: 0.85rem;
+            padding: 0.25rem 0.5rem;
         }
 
         .update-btn {
             min-width: 90px;
-            font-size: 0.85rem; /* Reduced font size */
-            padding: 0.25rem 0.75rem; /* Adjusted padding */
-            margin: 0.25rem 0; /* Added margin for spacing */
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Added shadow */
-            transition: box-shadow 0.2s;
-        }
-
-        .update-btn:hover {
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* Enhanced shadow on hover */
+            font-size: 0.85rem;
+            padding: 0.25rem 0.75rem;
         }
 
         .text-truncate {
@@ -214,60 +288,19 @@
 
         .btn-info {
             color: white;
-            font-size: 0.85rem; /* Reduced font size */
-            padding: 0.25rem 0.75rem; /* Adjusted padding */
-        }
-
-        .notes-cell {
-            min-width: 150px;
-            padding: 0.5rem; /* Adjusted padding */
+            font-size: 0.85rem;
+            padding: 0.25rem 0.75rem;
         }
 
         .card {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Added card shadow */
-            margin: 1.5rem; /* Increased margin for better spacing */
-            border-radius: 0.5rem; /* Slightly rounded corners */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin: 1.5rem;
+            border-radius: 0.5rem;
         }
 
-        .card-header {
-            padding: 1rem 1.5rem; /* Increased padding */
-            margin-bottom: 0.5rem; /* Added margin for spacing */
-        }
-
+        .card-header,
         .card-body {
-            padding: 1.5rem; /* Increased padding */
-        }
-
-        .table {
-            font-size: 0.9rem; /* Reduced font size for table */
-            margin-bottom: 1rem; /* Added margin for spacing */
-        }
-
-        .table th, .table td {
-            padding: 0.75rem; /* Adjusted padding for table cells */
-            vertical-align: middle;
-        }
-
-        .table-hover tbody tr:hover {
-            background-color: rgba(0, 0, 0, 0.03); /* Subtle hover effect */
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Row shadow on hover */
-        }
-
-        .alert {
-            font-size: 0.9rem; /* Reduced font size for alerts */
-            margin: 1rem 1.5rem; /* Adjusted margin */
-            padding: 0.75rem 1rem; /* Adjusted padding */
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); /* Added shadow for alerts */
-        }
-
-        #searchInput {
-            font-size: 0.85rem; /* Reduced font size */
-            padding: 0.25rem 0.75rem; /* Adjusted padding */
-            margin-right: 0.5rem; /* Added margin for spacing */
-        }
-
-        #pagination-container {
-            margin-top: 1.5rem; /* Increased margin */
+            padding: 1.5rem;
         }
     </style>
 @endsection

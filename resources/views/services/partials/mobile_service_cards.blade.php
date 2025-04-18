@@ -35,6 +35,10 @@
             </div>
 
             <div class="mb-2">
+                <strong>Emp status:</strong> {{ $service->service_status }}
+            </div>
+
+            <div class="mb-2">
                 <strong>Cost:</strong> ₹{{ number_format($service->cost, 2) }}
             </div>
 
